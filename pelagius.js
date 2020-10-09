@@ -13,7 +13,35 @@ var approvedChannels = [];
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
-	client.user.setActivity('Eating cheese in the Shivering Isles');
+	client.user.setActivity('a game');
+
+  fs.access('./data', fs.constants.F_OK, (err) => {
+    if (err) {
+      fs.mkdir('./data', (err) => {
+        if (err) {
+          console.log("Error: could not create directory \'data\'");
+        } else {
+          console.log("Created directory \'data\'");
+        }
+      });
+    }
+  });
+
+  fs.access('./data/channels.dat', fs.constants.F_OK, (err) => {
+    if (err) {
+      // File does not exist, this is OK
+    } else {
+      fs.readFile('./data/channels.dat', 'utf8', (err, data) => {
+        if (err) {
+          console.log("Could not read \'data/channels.dat\'");
+        } else {
+          data.split(',').forEach((channelID) => {
+            approvedChannels.push(channelID);
+          });
+        }
+      });
+    }
+  });
 });
 
 client.on('message', async (message) => {
@@ -70,10 +98,20 @@ function isApprovedChannel(channelID) {
 
 function addApprovedChannel(channelID) {
   approvedChannels.push(channelID.toString());
+  updateChannelFile();
 }
 
 function removeApprovedChannel(channelID) {
   approvedChannels.splice(approvedChannels.indexOf(channelID.toString()),1);
+  updateChannelFile();
+}
+
+function updateChannelFile() {
+  fs.writeFile('./data/channels.dat', approvedChannels.toString(), (err) => {
+    if (err) {
+      console.log("Could not write approvedChannels to \'data/channels.dat\'")
+    }
+  });
 }
 
 // TODO: Add user group checking
@@ -83,7 +121,5 @@ function isStaff(userID) {
   }
   return false;
 }
-
-
 
 client.login(token);
