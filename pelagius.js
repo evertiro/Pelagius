@@ -14,6 +14,7 @@ client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 	client.user.setActivity('a game');
 
+  // Try to create data directory if not present
   fs.access('./data', fs.constants.F_OK, (err) => {
     if (err) {
       fs.mkdir('./data', (err) => {
@@ -26,10 +27,10 @@ client.on('ready', () => {
     }
   });
 
+  // Load data from data/channels.dat into approvedChannels array
+  // If file doesn't exist, that's fine
   fs.access('./data/channels.dat', fs.constants.F_OK, (err) => {
-    if (err) {
-      // File does not exist, this is OK
-    } else {
+    if (!err) {
       fs.readFile('./data/channels.dat', 'utf8', (err, data) => {
         if (err) {
           console.log("Could not read \'data/channels.dat\'");
@@ -77,6 +78,7 @@ client.on('message', async (message) => {
     }
     if (message.content === '!loadorder channel list') {
       let response = "List of approved channels:\n";
+      // Loop through approvedChannels, adding each one that's in the same guild as the sent command to the output
       approvedChannels.forEach((channelID) => {
         if (isInGuild(message.guild, channelID)) {
           response += "<#" + channelID + ">\n";
