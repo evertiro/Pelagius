@@ -6,7 +6,7 @@ const https = require('https');
 
 const token = process.env.BOT_TOKEN;
 
-var staffUsers = ["222809044103069696"];
+var staffUsers = new Map();
 var staffGroups = [];
 var approvedChannels = [];
 
@@ -42,6 +42,50 @@ client.on('ready', () => {
       });
     }
   });
+
+  // Load data from data/users.dat into staffUsers
+  // Also ensures each server owner starts as staff
+  fs.access('./data/users.dat', fs.constants.F_OK, (err) => {
+    // If file doesn't exist, populate staffUsers with server owners
+    if (err) {
+      client.guilds.cache.forEach((guild) => {
+        staffUsers.set(guild.id, [guild.ownerID])
+      });
+      updateStaffFile();
+      console.log(staffUsers);
+    } else {
+      fs.readFile('./data/users.dat', 'utf8', (err, data) => {
+        if (err) {
+          console.log("Could not read \'data/users.dat\'");
+        } else {
+          // Split IDs from file into a list
+          let ids = data.split(',');
+          let serverIDIndecies = [];
+          // Populate serverIDIndecies with each index of the guilds in the list
+          for (let i = 0; i < ids.length; i++) {
+            if (client.guilds.cache.has(ids[i])) {
+              serverIDIndecies.push(i);
+            }
+          }
+          // Then loop through those indecies, slicing between each one and adding to map
+          for (let i = 0; i < serverIDIndecies.length; i++) {
+            let guildID = ids[serverIDIndecies[i]];
+            var userIDs;
+            // Check if at end of loop, otherwise would throw IndexOutOfBounds
+            if (i + 1 != serverIDIndecies.length) {
+              userIDs = ids.slice(serverIDIndecies[i]+1, serverIDIndecies[i+1]);
+            } else {
+              userIDs = ids.slice(serverIDIndecies[i]+1);
+            }
+            // Add list to map
+            staffUsers.set(guildID, userIDs);
+          }
+          console.log(staffUsers);
+        }
+      });
+    }
+  })
+
 });
 
 client.on('message', async (message) => {
@@ -51,7 +95,7 @@ client.on('message', async (message) => {
 
   // Staff only commands
   if (message.content.startsWith('!loadorder channel')) {
-    if (!isStaff(message.author.id)) {
+    if (!isStaff(message.guild, message.author.id)) {
       return;
     }
     if (message.content === '!loadorder channel') {
@@ -89,6 +133,42 @@ client.on('message', async (message) => {
     }
   }
 
+  if (message.content.startsWith('!loadorder staff')) {
+    if (!isStaff(message.guild, message.author.id)) {
+      return;
+    }
+    if (message.content === '!loadorder staff') {
+      message.channel.send("Subcommands of `!loadorder staff`:\n" +
+                           "`!loadorder staff add <user>` - Sets the given user as staff for the server\n" +
+                           "`!loadorder staff remove <user>` - Removes staff from the given user for the server\n" +
+                           "`!loadorder staff list` - Lists the staff in the server");
+      return;
+    }
+    if (message.content.startsWith('!loadorder staff add')) {
+      if (message.mentions.members.array().length != 1) {
+        message.channel.send("This command must ping (mention) exactly 1 user, found " + message.mentions.members.array().length);
+        return;
+      }
+      let user = message.mentions.members.first();
+      addStaff(message.guild, user.id);
+      message.channel.send("Added " + user.user.username + " to the staff list");
+    }
+    if (message.content.startsWith('!loadorder staff remove')) {
+      if (message.mentions.members.array().length != 1) {
+        message.channel.send("This command must ping (mention) exactly 1 user, found " + message.mentions.members.array().length);
+        return;
+      }
+      let user = message.mentions.members.first();
+      if (user.id === message.guild.ownerID) {
+        message.channel.send("That user cannot be removed from staff, they are the server owner");
+        return;
+      }
+      removeStaff(message.guild, user.id);
+      message.channel.send("Removed " + user.user.username + " from the staff list");
+    }
+
+  }
+
   // User commands, only allowed in approved channels
   if (!isApprovedChannel(message.channel.id)) {
     return;
@@ -105,7 +185,7 @@ function addApprovedChannel(channelID) {
 }
 
 function removeApprovedChannel(channelID) {
-  approvedChannels.splice(approvedChannels.indexOf(channelID.toString()),1);
+  approvedChannels.splice(approvedChannels.indexOf(channelID), 1);
   updateChannelFile();
 }
 
@@ -121,12 +201,37 @@ function isInGuild(guild, channelID) {
   return guild.channels.cache.get(channelID) !== undefined;
 }
 
-// TODO: Add user group checking
-function isStaff(userID) {
-  if (staffUsers.includes(userID.toString())) {
-    return true;
-  }
-  return false;
+function addStaff(guild, userID) {
+  // Get the current list of staff users in the guild
+  let guildStaff = staffUsers.get(guild.id);
+  // Add the new user to that list
+  guildStaff.push(userID);
+  // Replace that list in the map staffUsers
+  staffUsers.set(guild.id, guildStaff);
+  updateStaffFile();
+}
+
+function removeStaff(guild, userID) {
+  // Get the current list of staff users in the guild
+  let guildStaff = staffUsers.get(guild.id);
+  // Remove the user from that list
+  guildStaff.splice(guildStaff.indexOf(userID), 1);
+  // Replace that list in the map staffUsers
+  staffUsers.set(guild.id, guildStaff);
+  updateStaffFile();
+}
+
+function isStaff(guild, userID) {
+  let guildStaff = staffUsers.get(guild.id);
+  return guildStaff.includes(userID);
+}
+
+function updateStaffFile() {
+  fs.writeFile('./data/users.dat', Array.from(staffUsers).toString(), (err) => {
+    if (err) {
+      console.log("Could not write staffUsers to \'data/users.dat\'");
+    }
+  })
 }
 
 client.login(token);
