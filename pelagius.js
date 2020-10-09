@@ -78,7 +78,9 @@ client.on('message', async (message) => {
     if (message.content === '!loadorder channel list') {
       let response = "List of approved channels:\n";
       approvedChannels.forEach((channelID) => {
-        response += "<#" + channelID + ">\n";
+        if (isInGuild(message.guild, channelID)) {
+          response += "<#" + channelID + ">\n";
+        }
       });
       message.channel.send(response);
       return;
@@ -111,6 +113,10 @@ function updateChannelFile() {
       console.log("Could not write approvedChannels to \'data/channels.dat\'")
     }
   });
+}
+
+function isInGuild(guild, channelID) {
+  return guild.channels.cache.get(channelID) !== undefined;
 }
 
 // TODO: Add user group checking
