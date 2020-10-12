@@ -218,7 +218,7 @@ client.on('message', async (message) => {
 			return;
 		}
 		// Regex to match message
-		let regex = '!loadorder file [a-z]\\w+';
+		let regex = '!loadorder file [a-z]\\w+ ';
 
 		let fileType = message.content.split(' ')[2];
 		if (!isValidFile(fileType)) {
