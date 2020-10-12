@@ -80,7 +80,6 @@ client.on('ready', () => {
             // Add list to map
             staffUsers.set(guildID, userIDs);
           }
-          console.log(staffUsers);
         }
       });
     }
@@ -171,6 +170,23 @@ client.on('message', async (message) => {
       removeStaff(message.guild, user.id);
       message.channel.send("Removed " + user.user.username + " from the staff list");
     }
+		if (message.content === '!loadorder staff list') {
+			let response = "List of staff members:\n";
+      // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
+      staffUsers.forEach((users, guild) => {
+        if (guild === message.guild.id) {
+					// guilds are keys, users are values (in an array)
+					// get the proper guild, then loop through the users in the array
+					users.forEach((userID) => {
+						// Convert from developer ID to username and tag (i.e. Robotic#1111)
+						let userObj = client.users.cache.get(userID);
+						response += userObj.username + "#" + userObj.discriminator + "\n";
+					});
+        }
+      });
+      message.channel.send(response);
+      return;
+		}
 
   }
 
