@@ -218,14 +218,16 @@ client.on('message', async (message) => {
 			return;
 		}
 		// Regex to match message
-		let regex = '!loadorder file [a-z]\\w+ ';
+		let regex = '!loadorder file [a-z]\\w+';
+
+		let fileType = message.content.split(' ')[2];
+		if (!isValidFile(fileType)) {
+			message.channel.send('Unknown file type: `' + fileType + '`. Known files types:\n' +
+													 'loadorder\nskip\nreasons\nloot');
+			return;
+		}
+
 		if (message.content.match(regex + 'update') !== null) {
-			let fileType = message.content.split(' ')[2];
-			if (!isValidFile(fileType)) {
-				message.channel.send('Unknown file type: `' + fileType + '`. Known files types:\n' +
-														 'loadorder\nskip\nreasons\nloot');
-				return;
-			}
 			if (message.attachments.size != 1) {
 				message.channel.send('Message must contain exactly 1 attachment');
 				return;
