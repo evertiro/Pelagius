@@ -169,8 +169,8 @@ client.on('message', async (message) => {
 
   }
 
-  // User commands, only allowed in approved channels
-  if (!isApprovedChannel(message.channel.id)) {
+  // User commands, only allowed in approved channels or DMs
+  if (message.guild === null || !isApprovedChannel(message.channel.id)) {
     return;
   }
 });
