@@ -204,6 +204,34 @@ client.on('message', async (message) => {
 		}
   }
 
+	if (message.content.startsWith('!loadorder file')) {
+		if (!isStaff(message.guild, message.author.id)) {
+      return;
+    }
+		if (message.content === '!loadorder file') {
+			message.channel.send('Subcommands of `!loadorder file`:\n' +
+													 '`!loadorder file [file] update`: Updates the specified file\n' +
+												   '`!loadorder file [file] archive`: Archives the current specified file (rarely used)\n' +
+												   '`!loadorder file [file] retrieve`: Retrieves and sends the specified file in a discord message attachment\n\n' +
+												   'Possible files:\n' +
+												   'loadorder\nskip\nreasons\nloot');
+			return;
+		}
+		// Regex to match message
+		let regex = '!loadorder file [a-z]\\w+ ';
+		if (message.content.match(regex + 'update') !== null) {
+			let fileType = message.content.split(' ')[2];
+			if (!isValidFile(fileType)) {
+				message.channel.send('Unknown file type: `' + fileType + '`. Known files types:\n' +
+														 'loadorder\nskip\nreasons\nloot');
+				return;
+			}
+			if (message.attachments.size != 1) {
+				message.channel.send('Message must contain exactly 1 attachment');
+				return;
+			}
+		}
+	}
 
   // User commands, only allowed in approved channels
   if (!isApprovedChannel(message.channel.id)) {
@@ -274,6 +302,10 @@ function updateStaffFile() {
 			client.channels.cache.get('765326262616719366').send('Wrote staffUsers to data/users.dat');
 		}
   })
+}
+
+function isValidFile(fileType) {
+	return (fileType === "loadorder" || fileType === "skip" || fileType === "reasons" || fileType === "loot");
 }
 
 client.login(token);
