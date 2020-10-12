@@ -21,11 +21,11 @@ client.on('ready', () => {
     if (err) {
       fs.mkdir('./data', (err) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send(err);
-          console.log("Error: could not create directory \'data\'");
+					client.channels.cache.get('765326262616719366').send('Error: could not create directory `data`: \n' + err);
+          console.log('Error: could not create directory \'data\'');
         } else {
 					client.channels.cache.get('765326262616719366').send('Created directory `data`');
-          console.log("Created directory \'data\'");
+          console.log('Created directory \'data\'');
         }
       });
     }
@@ -37,8 +37,8 @@ client.on('ready', () => {
     if (!err) {
       fs.readFile('./data/channels.dat', 'utf8', (err, data) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send(err);
-          console.log("Could not read \'data/channels.dat\'");
+					client.channels.cache.get('765326262616719366').send('Error: could not read `data/channels.dat`: \n' + err);
+          console.log('Error: could not read \'data/channels.dat\'');
         } else {
           data.split(',').forEach((channelID) => {
             approvedChannels.push(channelID);
@@ -62,8 +62,8 @@ client.on('ready', () => {
     } else {
       fs.readFile('./data/users.dat', 'utf8', (err, data) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send(err);
-          console.log("Could not read \'data/users.dat\'");
+					client.channels.cache.get('765326262616719366').send('Error: could not read `data/users.dat`: \n' + err);
+          console.log('Error: could not read \'data/users.dat\'');
         } else {
           // Split IDs from file into a list
           let ids = data.split(',');
@@ -118,33 +118,33 @@ client.on('message', async (message) => {
       return;
     }
     if (message.content === '!loadorder channel') {
-      message.channel.send("Subcommands of `!loadorder channel`:\n" +
-                           "`!loadorder channel add` - Adds this channel to list of approved channels\n" +
-                           "`!loadorder channel remove` - Removes this channel from list of approved channels\n" +
-                           "`!loadorder channel status` - Says if channel is currently approved or not\n" +
-                           "`!loadorder channel list` - Lists approved channels");
+      message.channel.send('Subcommands of `!loadorder channel`:\n' +
+                           '`!loadorder channel add` - Adds this channel to list of approved channels\n' +
+                           '`!loadorder channel remove` - Removes this channel from list of approved channels\n' +
+                           '`!loadorder channel status` - Says if channel is currently approved or not\n' +
+                           '`!loadorder channel list` - Lists approved channels');
       return;
     }
     if (message.content === '!loadorder channel add') {
       addApprovedChannel(message.channel.id);
-      message.channel.send("Added <#" + message.channel.id + "> to the list of approved channels.");
+      message.channel.send('Added <#' + message.channel.id + '> to the list of approved channels.');
       return;
     }
     if (message.content === '!loadorder channel remove') {
       removeApprovedChannel(message.channel.id);
-      message.channel.send("Removed <#" + message.channel.id + "> from the list of approved channels.");
+      message.channel.send('Removed <#' + message.channel.id + '> from the list of approved channels.');
       return;
     }
     if (message.content === '!loadorder channel status') {
-      message.channel.send("<#" + message.channel.id + "> is" + (isApprovedChannel(message.channel.id) ? "" : " not") + " an approved channel");
+      message.channel.send('<#' + message.channel.id + '> is' + (isApprovedChannel(message.channel.id) ? '' : ' not') + ' an approved channel');
       return;
     }
     if (message.content === '!loadorder channel list') {
-      let response = "List of approved channels:\n";
+      let response = 'List of approved channels:\n';
       // Loop through approvedChannels, adding each one that's in the same guild as the sent command to the output
       approvedChannels.forEach((channelID) => {
         if (isInGuild(message.guild, channelID)) {
-          response += "<#" + channelID + ">\n";
+          response += '<#' + channelID + '>\n';
         }
       });
       message.channel.send(response);
@@ -157,36 +157,36 @@ client.on('message', async (message) => {
       return;
     }
     if (message.content === '!loadorder staff') {
-      message.channel.send("Subcommands of `!loadorder staff`:\n" +
-                           "`!loadorder staff add <user>` - Sets the given user as staff for the server\n" +
-                           "`!loadorder staff remove <user>` - Removes staff from the given user for the server\n" +
-                           "`!loadorder staff list` - Lists the staff in the server");
+      message.channel.send('Subcommands of `!loadorder staff`:\n' +
+                           '`!loadorder staff add <user>` - Sets the given user as staff for the server\n' +
+                           '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
+                           '`!loadorder staff list` - Lists the staff in the server');
       return;
     }
     if (message.content.startsWith('!loadorder staff add')) {
       if (message.mentions.members.array().length != 1) {
-        message.channel.send("This command must ping (mention) exactly 1 user, found " + message.mentions.members.array().length);
+        message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
         return;
       }
       let user = message.mentions.members.first();
       addStaff(message.guild, user.id);
-      message.channel.send("Added " + user.user.username + " to the staff list");
+      message.channel.send('Added ' + user.user.username + ' to the staff list');
     }
     if (message.content.startsWith('!loadorder staff remove')) {
       if (message.mentions.members.array().length != 1) {
-        message.channel.send("This command must ping (mention) exactly 1 user, found " + message.mentions.members.array().length);
+        message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
         return;
       }
       let user = message.mentions.members.first();
       if (user.id === message.guild.ownerID) {
-        message.channel.send("That user cannot be removed from staff, they are the server owner");
+        message.channel.send('That user cannot be removed from staff, they are the server owner');
         return;
       }
       removeStaff(message.guild, user.id);
-      message.channel.send("Removed " + user.user.username + " from the staff list");
+      message.channel.send('Removed ' + user.user.username + ' from the staff list');
     }
 		if (message.content === '!loadorder staff list') {
-			let response = "List of staff members:\n";
+			let response = 'List of staff members:\n';
       // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
       staffUsers.forEach((users, guild) => {
         if (guild === message.guild.id) {
@@ -195,15 +195,15 @@ client.on('message', async (message) => {
 					users.forEach((userID) => {
 						// Convert from developer ID to username and tag (i.e. Robotic#1111)
 						let userObj = client.users.cache.get(userID);
-						response += userObj.username + "#" + userObj.discriminator + "\n";
+						response += userObj.username + '#' + userObj.discriminator + '\n';
 					});
         }
       });
       message.channel.send(response);
       return;
 		}
-
   }
+
 
   // User commands, only allowed in approved channels
   if (!isApprovedChannel(message.channel.id)) {
@@ -228,8 +228,8 @@ function removeApprovedChannel(channelID) {
 function updateChannelFile() {
   fs.writeFile('./data/channels.dat', approvedChannels.toString(), (err) => {
     if (err) {
-			client.channels.cache.get('765326262616719366').send(err);
-      console.log("Could not write approvedChannels to \'data/channels.dat\'")
+			client.channels.cache.get('765326262616719366').send('Error: could not write approvedChannels to \'data/channels.dat\'\n' + err);
+      console.log('Error: could not write approvedChannels to \'data/channels.dat\'')
     } else {
 			client.channels.cache.get('765326262616719366').send('Wrote approvedChannels to data/channels.dat');
 		}
@@ -268,8 +268,8 @@ function isStaff(guild, userID) {
 function updateStaffFile() {
   fs.writeFile('./data/users.dat', Array.from(staffUsers).toString(), (err) => {
     if (err) {
-			client.channels.cache.get('765326262616719366').send(err);
-      console.log("Could not write staffUsers to \'data/users.dat\'");
+			client.channels.cache.get('765326262616719366').send('Error: could not write staffUsers to \'data/users.dat\'\n' + err);
+      console.log('Error: could not write staffUsers to \'data/users.dat\'');
     } else {
 			client.channels.cache.get('765326262616719366').send('Wrote staffUsers to data/users.dat');
 		}
