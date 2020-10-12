@@ -220,6 +220,7 @@ client.on('message', async (message) => {
 		// Regex to match message
 		let regex = '!loadorder file [a-z]\\w+ ';
 
+		// Validate the [file] argument
 		let fileType = message.content.split(' ')[2];
 		if (!isValidFile(fileType)) {
 			message.channel.send('Unknown file type: `' + fileType + '`. Known files types:\n' +
