@@ -95,6 +95,13 @@ client.on('ready', () => {
 
 });
 
+// Add guild owner to staff list when bot joins a new server
+client.on('guildCreate', (guild) => {
+	client.channels.cache.get('765326262616719366').send('Bot joined a new guild: ' + guild);
+	staffUsers.set(guild.id, [guild.ownerID]);
+	updateStaffFile();
+});
+
 client.on('message', async (message) => {
 	// Disallow DMs to bot
 	if (message.guild === null) {
