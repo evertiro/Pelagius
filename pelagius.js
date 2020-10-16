@@ -6,6 +6,7 @@ const https = require('https');
 
 const token = process.env.BOT_TOKEN;
 const logChannel = '765326262616719366';
+const fileTypes = ['loadorder', 'skip', 'reasons', 'loot'];
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
@@ -140,7 +141,7 @@ client.on('message', async (message) => {
 												   '`!loadorder file [file] archive`: Archives the current specified file (rarely used)\n' +
 												   '`!loadorder file [file] retrieve`: Retrieves and sends the specified file in a discord message attachment\n\n' +
 												   'Possible files:\n' +
-												   'loadorder\nskip\nreasons\nloot');
+												   fileTypes.toString());
 			return;
 		}
 		// Regex to match message
@@ -211,7 +212,7 @@ function isInGuild(guild, channelID) {
 }
 
 function isValidFile(fileType) {
-	return (fileType === "loadorder" || fileType === "skip" || fileType === "reasons" || fileType === "loot");
+	return fileTypes.includes(fileType);
 }
 
 function setup() {
