@@ -5,6 +5,7 @@ const fs = require('fs');
 const https = require('https');
 
 const token = process.env.BOT_TOKEN;
+const logChannel = '765326262616719366';
 
 var staffUsers = new Map();
 var staffGroups = [];
@@ -14,17 +15,16 @@ client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 	client.user.setActivity('a game');
 
-	client.channels.cache.get('765326262616719366').send('Bot starting...');
-
+	client.channels.cache.get(logChannel).send('Bot starting...');
   // Try to create data directory if not present
   fs.access('./data', fs.constants.F_OK, (err) => {
     if (err) {
       fs.mkdir('./data', (err) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send('Error: could not create directory `data`: \n' + err);
+					client.channels.cache.get(logChannel).send('Error: could not create directory `data`: \n' + err);
           console.log('Error: could not create directory \'data\'');
         } else {
-					client.channels.cache.get('765326262616719366').send('Created directory `data`');
+					client.channels.cache.get(logChannel).send('Created directory `data`');
           console.log('Created directory \'data\'');
         }
       });
@@ -37,13 +37,13 @@ client.on('ready', () => {
     if (!err) {
       fs.readFile('./data/channels.dat', 'utf8', (err, data) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send('Error: could not read `data/channels.dat`: \n' + err);
+					client.channels.cache.get(logChannel).send('Error: could not read `data/channels.dat`: \n' + err);
           console.log('Error: could not read \'data/channels.dat\'');
         } else {
           data.split(',').forEach((channelID) => {
             approvedChannels.push(channelID);
           });
-					client.channels.cache.get('765326262616719366').send('Loaded approved channels to memory');
+					client.channels.cache.get(logChannel).send('Loaded approved channels to memory');
         }
       });
     }
@@ -58,11 +58,11 @@ client.on('ready', () => {
         staffUsers.set(guild.id, [guild.ownerID])
       });
       updateStaffFile();
-      client.channels.cache.get('765326262616719366').send('Created a new staff file with server owners as staff');
+      client.channels.cache.get(logChannel).send('Created a new staff file with server owners as staff');
     } else {
       fs.readFile('./data/users.dat', 'utf8', (err, data) => {
         if (err) {
-					client.channels.cache.get('765326262616719366').send('Error: could not read `data/users.dat`: \n' + err);
+					client.channels.cache.get(logChannel).send('Error: could not read `data/users.dat`: \n' + err);
           console.log('Error: could not read \'data/users.dat\'');
         } else {
           // Split IDs from file into a list
@@ -87,7 +87,7 @@ client.on('ready', () => {
             // Add list to map
             staffUsers.set(guildID, userIDs);
           }
-					client.channels.cache.get('765326262616719366').send('Loaded staff list from file to memory');
+					client.channels.cache.get(logChannel).send('Loaded staff list from file to memory');
         }
       });
     }
@@ -97,7 +97,7 @@ client.on('ready', () => {
 
 // Add guild owner to staff list when bot joins a new server
 client.on('guildCreate', (guild) => {
-	client.channels.cache.get('765326262616719366').send('Bot joined a new guild: ' + guild);
+	client.channels.cache.get(logChannel).send('Bot joined a new guild: ' + guild);
 	staffUsers.set(guild.id, [guild.ownerID]);
 	updateStaffFile();
 });
@@ -259,10 +259,10 @@ function removeApprovedChannel(channelID) {
 function updateChannelFile() {
   fs.writeFile('./data/channels.dat', approvedChannels.toString(), (err) => {
     if (err) {
-			client.channels.cache.get('765326262616719366').send('Error: could not write approvedChannels to \'data/channels.dat\'\n' + err);
+			client.channels.cache.get(logChannel).send('Error: could not write approvedChannels to \'data/channels.dat\'\n' + err);
       console.log('Error: could not write approvedChannels to \'data/channels.dat\'')
     } else {
-			client.channels.cache.get('765326262616719366').send('Wrote approvedChannels to data/channels.dat');
+			client.channels.cache.get(logChannel).send('Wrote approvedChannels to data/channels.dat');
 		}
   });
 }
@@ -299,10 +299,10 @@ function isStaff(guild, userID) {
 function updateStaffFile() {
   fs.writeFile('./data/users.dat', Array.from(staffUsers).toString(), (err) => {
     if (err) {
-			client.channels.cache.get('765326262616719366').send('Error: could not write staffUsers to \'data/users.dat\'\n' + err);
+			client.channels.cache.get(logChannel).send('Error: could not write staffUsers to \'data/users.dat\'\n' + err);
       console.log('Error: could not write staffUsers to \'data/users.dat\'');
     } else {
-			client.channels.cache.get('765326262616719366').send('Wrote staffUsers to data/users.dat');
+			client.channels.cache.get(logChannel).send('Wrote staffUsers to data/users.dat');
 		}
   })
 }
