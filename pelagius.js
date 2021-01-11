@@ -85,6 +85,8 @@ client.on('message', async (message) => {
         }
     }
 
+    // Staff only commands
+
     if (message.content.startsWith('!loadorder staff')) {
         if (!isStaff(message.guild, message.author.id)) {
             return;
@@ -252,8 +254,10 @@ function createDirectory(path) {
 function loadChannels(guild) {
     // Try to access the channels file for the guild
     fs.access('./data/' + guild.id + '/channels.dat', fs.constants.F_OK, (err) => {
-        // If it errors, there's no file, that's fine
+        // If it errors, there's no file, set an empty one
         if (err) {
+            approvedChannels.set(guild.id, []);
+            saveChannels(guild);
             return;
         }
         // Now try to read the file
