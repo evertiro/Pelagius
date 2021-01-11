@@ -37,12 +37,18 @@ client.on('message', async (message) => {
         return;
     }
 
-    // Staff only commands
-    if (message.content.startsWith('!loadorder channel')) {
+    let args = message.content.split(' ');
+    if (args.length === 1) {
+        message.channel.send('TODO: Add help message');
+        return;
+    }
+    args = args.slice(1, args.length);
+
+    if (args[0] === 'channel') {
         if (!isStaff(message.guild, message.author.id)) {
             return;
         }
-        if (message.content === '!loadorder channel') {
+        if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder channel`:\n' +
                 '`!loadorder channel add` - Adds this channel to list of approved channels\n' +
                 '`!loadorder channel remove` - Removes this channel from list of approved channels\n' +
@@ -50,21 +56,16 @@ client.on('message', async (message) => {
                 '`!loadorder channel list` - Lists approved channels');
             return;
         }
-        if (message.content === '!loadorder channel add') {
+
+        if (args[1] === 'add') {
             addApprovedChannel(message.guild, message.channel.id);
             message.channel.send('Added <#' + message.channel.id + '> to the list of approved channels.');
-            return;
-        }
-        if (message.content === '!loadorder channel remove') {
+        } else if (args[1] === 'remove') {
             removeApprovedChannel(message.guild, message.channel.id);
             message.channel.send('Removed <#' + message.channel.id + '> from the list of approved channels.');
-            return;
-        }
-        if (message.content === '!loadorder channel status') {
+        } else if (args[1] === 'status') {
             message.channel.send('<#' + message.channel.id + '> is' + (isApprovedChannel(message.guild, message.channel.id) ? '' : ' not') + ' an approved channel');
-            return;
-        }
-        if (message.content === '!loadorder channel list') {
+        } else if (args[1] === 'list') {
             let response = 'List of approved channels:\n';
             // Loop through approvedChannels, adding each one that's in the same guild as the sent command to the output
             approvedChannels.forEach((channels, guild) => {
@@ -75,7 +76,12 @@ client.on('message', async (message) => {
                 }
             });
             message.channel.send(response);
-            return;
+        } else {
+            message.channel.send('Subcommands of `!loadorder channel`:\n' +
+                '`!loadorder channel add` - Adds this channel to list of approved channels\n' +
+                '`!loadorder channel remove` - Removes this channel from list of approved channels\n' +
+                '`!loadorder channel status` - Says if channel is currently approved or not\n' +
+                '`!loadorder channel list` - Lists approved channels');
         }
     }
 
