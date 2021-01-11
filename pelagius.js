@@ -156,7 +156,7 @@ client.on('message', async (message) => {
 
         if (args[2] === 'update') {
             if (message.attachments.size !== 1) {
-                message.channel.send('Message must contain exactly 1 attachment');
+                message.channel.send('Message must contain exactly 1 attachment, got ' + message.attachments.size);
                 return;
             }
         }
