@@ -85,20 +85,20 @@ client.on('message', async (message) => {
         }
     }
 
-    // Staff only commands
-
-    if (message.content.startsWith('!loadorder staff')) {
+    if (args[0] === 'staff') {
         if (!isStaff(message.guild, message.author.id)) {
             return;
         }
-        if (message.content === '!loadorder staff') {
+
+        if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder staff`:\n' +
                 '`!loadorder staff add <user>` - Sets the given user as staff for the server\n' +
                 '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
                 '`!loadorder staff list` - Lists the staff in the server');
             return;
         }
-        if (message.content.startsWith('!loadorder staff add')) {
+
+        if (args[1] === 'add') {
             if (message.mentions.members.array().length != 1) {
                 message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
                 return;
@@ -106,8 +106,7 @@ client.on('message', async (message) => {
             let user = message.mentions.members.first();
             addStaff(message.guild, user.id);
             message.channel.send('Added ' + user.user.username + ' to the staff list');
-        }
-        if (message.content.startsWith('!loadorder staff remove')) {
+        } else if (args[1] === 'remove') {
             if (message.mentions.members.array().length != 1) {
                 message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
                 return;
@@ -119,8 +118,7 @@ client.on('message', async (message) => {
             }
             removeStaff(message.guild, user.id);
             message.channel.send('Removed ' + user.user.username + ' from the staff list');
-        }
-        if (message.content === '!loadorder staff list') {
+        } else if (args[1] === 'list') {
             let response = 'List of staff members:\n';
             // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
             staffUsers.forEach((users, guild) => {
@@ -135,7 +133,11 @@ client.on('message', async (message) => {
                 }
             });
             message.channel.send(response);
-            return;
+        } else {
+            message.channel.send('Subcommands of `!loadorder staff`:\n' +
+                '`!loadorder staff add <user>` - Sets the given user as staff for the server\n' +
+                '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
+                '`!loadorder staff list` - Lists the staff in the server');
         }
     }
 
