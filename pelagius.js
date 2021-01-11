@@ -240,15 +240,7 @@ function createDirectory(path) {
         // Error means no directory
         if (err) {
             // Try to create directory
-            fs.mkdir(path, (err) => {
-                if (err) {
-                    client.channels.cache.get(logChannel).send('Error: could not create directory `' + path + '`: \n' + err);
-                    console.log('Error: could not create directory \'' + path + '\': \n' + err);
-                } else {
-                    client.channels.cache.get(logChannel).send('Created directory `' + path + '`');
-                    console.log('Created directory \'' + path + '\'');
-                }
-            });
+            fs.mkdirSync(path);
         }
     });
 }
