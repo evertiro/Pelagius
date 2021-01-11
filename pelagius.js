@@ -356,11 +356,33 @@ function getMemberStr(member) {
     let nick = member.nickname;
     if (nick === null)
         nick = user.username;
-    return "`MB:" + nick + "(" + getUserStr(user) + " / " + getGuildStr(guild) + ")`";
+    return '`MB:' + nick + '(' + getUserStr(user) + ' / ' + getGuildStr(guild) + ')`';
 }
 
 function getMemberStrFromId(guild, id) {
     return getMemberStr(getMember(guild, id));
+}
+
+function getFileNameFromFileType(fileType) {
+    if (fileType === 'loadorder')
+        return 'loadorder.txt';
+    else if (fileType === 'skips')
+        return 'skips.txt';
+    else if (fileType === 'loot')
+        return 'userlist.yaml';
+    else if (fileType === 'reasons')
+        return 'reasons.json';
+    return null;
+}
+
+function getExtensionFromFileType(fileType) {
+    if (fileType === 'loadorder' || fileType === 'skips')
+        return '.txt';
+    else if (fileType === 'loot')
+        return '.yaml';
+    else if (fileType === 'reasons')
+        return '.json';
+    return null;
 }
 
 client.login(token);
