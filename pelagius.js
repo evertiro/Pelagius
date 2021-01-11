@@ -305,7 +305,7 @@ function saveChannels(guild) {
     fs.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id)).toString(), (err) => {
         if (err) {
             client.channels.cache.get(logChannel).send('Error: could not write approvedChannels to `./data/' + guild.id + '/channels.dat`\n' + err);
-            console.log('Error: could not write approvedChannels to \'./data/' + guild.id + 'channels.dat\'\n' + err);
+            console.log('Error: could not write approvedChannels to \'./data/' + guild.id + '/channels.dat\'\n' + err);
         } else {
             client.channels.cache.get(logChannel).send('Wrote approvedChannels to `./data/' + guild.id + '/channels.dat`');
         }
