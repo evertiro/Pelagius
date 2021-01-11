@@ -83,9 +83,7 @@ client.on('message', async (message) => {
                 '`!loadorder channel status` - Says if channel is currently approved or not\n' +
                 '`!loadorder channel list` - Lists approved channels');
         }
-    }
-
-    if (args[0] === 'staff') {
+    } else if (args[0] === 'staff') {
         if (!isStaff(message.guild, message.author.id)) {
             return;
         }
@@ -139,13 +137,8 @@ client.on('message', async (message) => {
                 '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
                 '`!loadorder staff list` - Lists the staff in the server');
         }
-    }
-
-    if (message.content.startsWith('!loadorder file')) {
-        if (!isStaff(message.guild, message.author.id)) {
-            return;
-        }
-        if (message.content === '!loadorder file') {
+    } else if (args[0] === 'file') {
+        if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder file`:\n' +
                 '`!loadorder file [file] update`: Updates the specified file\n' +
                 '`!loadorder file [file] archive`: Archives the current specified file (rarely used)\n' +
@@ -154,19 +147,15 @@ client.on('message', async (message) => {
                 fileTypes.toString());
             return;
         }
-        // Regex to match message
-        let regex = '!loadorder file [a-z]\\w+ ';
 
-        // Validate the [file] argument
-        let fileType = message.content.split(' ')[2];
-        if (!isValidFile(fileType)) {
-            message.channel.send('Unknown file type: `' + fileType + '`. Known files types:\n' +
+        if (!isValidFile(args[1])) {
+            message.channel.send('Unknown file type: `' + args[1] + '`. Known files types:\n' +
                 'loadorder\nskip\nreasons\nloot');
             return;
         }
 
-        if (message.content.match(regex + 'update') !== null) {
-            if (message.attachments.size != 1) {
+        if (args[2] === 'update') {
+            if (message.attachments.size !== 1) {
                 message.channel.send('Message must contain exactly 1 attachment');
                 return;
             }
