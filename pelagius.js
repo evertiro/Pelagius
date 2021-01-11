@@ -168,6 +168,16 @@ client.on('message', async (message) => {
     }
 });
 
+async function archiveFile(guild, fileType) {
+    let folder = './data/' + guild.id + '/archive/' + fileType;
+    let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
+
+    await createDirectory(folder);
+    let stats = await fs.promises.stat(filePath);
+    let time = stats.mtime.toDateString().replace(/ /g, '_');
+    return fs.promises.rename(filePath, folder + '/' + fileType + '_' + time + getExtensionFromFileType(fileType));
+}
+
 function addApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.push(channelID);
