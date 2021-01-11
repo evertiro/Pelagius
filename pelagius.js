@@ -219,23 +219,16 @@ function isValidFile(fileType) {
 }
 
 function setup() {
-    createDirectory('./data');
     client.guilds.cache.forEach((guild) => {
-        createDirectory('./data/' + guild.id);
-        loadChannels(guild);
-        loadStaff(guild);
+        createDirectory('./data/' + guild.id).then(() => {
+            loadChannels(guild);
+            loadStaff(guild);
+        });
     });
 }
 
-function createDirectory(path) {
-    // First try to access the directory
-    fs.access(path, fs.constants.F_OK, (err) => {
-        // Error means no directory
-        if (err) {
-            // Try to create directory
-            fs.mkdirSync(path);
-        }
-    });
+async function createDirectory(path) {
+    return fs.promises.mkdir(path, { recursive: true });
 }
 
 function loadChannels(guild) {
