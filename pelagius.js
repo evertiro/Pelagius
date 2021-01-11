@@ -256,7 +256,8 @@ function loadChannels(guild) {
                 // Split file by comma, create a new list and add to Map
                 let guildChannels = [];
                 data.split(',').forEach((channelID) => {
-                    guildChannels.push(channelID);
+                    if (channelID !== '')
+                        guildChannels.push(channelID);
                 });
                 approvedChannels.set(guild.id, guildChannels);
                 logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
