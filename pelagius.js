@@ -167,7 +167,7 @@ client.on('message', async (message) => {
                 message.channel.send('File has been sucessfully updated.');
                 logMessage('The ' + args[1] + ' file has been updated in ' + getGuildStr(message.guild));
             }).catch((err) => {
-                message.channel.send('Something went wrong trying to update the file.');
+                message.channel.send('Something went wrong trying to update the file, contact Robotic!');
                 logMessage('FATAL: Something broke trying to update ' + args[1] + ' in ' + getGuildStr(message.guild));
                 console.log(err);
             });
