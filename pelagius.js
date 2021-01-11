@@ -164,13 +164,18 @@ client.on('message', async (message) => {
 
             
             updateFile(message.guild, args[1], url).then(() => {
-                message.channel.send("File has been sucessfully updated.");
-                logMessage("The " + args[1] + " file has been updated in " + getGuildStr(message.guild));
+                message.channel.send('File has been sucessfully updated.');
+                logMessage('The ' + args[1] + ' file has been updated in ' + getGuildStr(message.guild));
             }).catch((err) => {
-                message.channel.send("Something went wrong trying to update the file.");
-                logMessage("FATAL: Something broke trying to update " + args[1] + " in " + getGuildStr(message.guild));
+                message.channel.send('Something went wrong trying to update the file.');
+                logMessage('FATAL: Something broke trying to update ' + args[1] + ' in ' + getGuildStr(message.guild));
                 console.log(err);
             });
+        } else if (args[2] === 'archive') {
+            archiveIfNeeded(message.guild, args[1]).then(() => {
+                message.channel.send('The ' + args[1] + ' file has been successfully archived.');
+                logMessage('The ' + args[1] + ' file has been archived in ' + getGuildStr(message.guild));
+            })
         }
     }
 
@@ -196,7 +201,7 @@ async function updateFile(guild, fileType, url) {
 
 async function archiveIfNeeded(guild, fileType) {
     let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
-    return fs.promises.access(filePath, fs.constants.F_OK).then(() => await archiveFile(guild, fileType)).catch(() => {});
+    return fs.promises.access(filePath, fs.constants.F_OK).then(() => archiveFile(guild, fileType)).catch(() => {});
 }
 
 async function archiveFile(guild, fileType) {
