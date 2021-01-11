@@ -159,6 +159,18 @@ client.on('message', async (message) => {
                 message.channel.send('Message must contain exactly 1 attachment, got ' + message.attachments.size);
                 return;
             }
+            let attachment = message.attachments.first();
+            let url = attachment.url;
+
+            
+            updateFile(message.guild, args[1], url).then(() => {
+                message.channel.send("File has been sucessfully updated.");
+                logMessage("The " + args[1] + " file has been updated in " + getGuildStr(message.guild));
+            }).catch((err) => {
+                message.channel.send("Something went wrong trying to update the file.");
+                logMessage("FATAL: Something broke trying to update " + args[1] + " in " + getGuildStr(message.guild));
+                console.log(err);
+            });
         }
     }
 
@@ -170,13 +182,21 @@ client.on('message', async (message) => {
 
 async function updateFile(guild, fileType, url) {
     await archiveIfNeeded(guild, fileType);
-    console.log("File possibly archived.");
-    return 1;
+    let file = fs.createWriteStream('./data/' + guild.id + '/' + getFileNameFromFileType(fileType));
+    return new Promise((resolve, reject) => {
+        https.get(url, (response) => {
+            response.on('error', (err) => {
+                reject(err);
+            });
+            response.pipe(file);
+            resolve();
+        });
+    });
 }
 
 async function archiveIfNeeded(guild, fileType) {
     let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
-    return fs.promises.access(filePath, fs.constants.F_OK).then(() => archiveFile(guild, fileType)).catch(() => {});
+    return fs.promises.access(filePath, fs.constants.F_OK).then(() => await archiveFile(guild, fileType)).catch(() => {});
 }
 
 async function archiveFile(guild, fileType) {
