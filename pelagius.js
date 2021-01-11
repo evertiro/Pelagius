@@ -317,7 +317,7 @@ function logMessage(msg) {
 }
 
 function getGuildStr(guild) {
-    return "`G:" + guild.name + "(" + guild.id + ")`";
+    return '`G:' + guild.name + '(' + guild.id + ')`';
 }
 
 function getChannel(id) {
@@ -326,19 +326,19 @@ function getChannel(id) {
 
 function getChannelStr(channel) {
     let type = channel.type;
-    let ret = "`";
-    if (type === "text")
-        ret += "TC";
-    else if (type === "voice")
-        ret += "VC";
-    else if (type === "dm")
-        ret += "DM";
-    else if (type === "news")
-        ret += "NC";
+    let ret = '`';
+    if (type === 'text')
+        ret += 'TC';
+    else if (type === 'voice')
+        ret += 'VC';
+    else if (type === 'dm')
+        ret += 'DM';
+    else if (type === 'news')
+        ret += 'NC';
     else
-        ret += "C";
+        ret += 'C';
     
-    ret += ":" + channel.name + "(" + channel.id + ") / " + getGuildStr(channel.guild) + "`";
+    ret += ':' + channel.name + '(' + channel.id + ') / ' + getGuildStr(channel.guild) + '`';
     return ret;
 }
 
@@ -347,7 +347,7 @@ function getMember(guild, id) {
 }
 
 function getUserStr(user) {
-    return "`U:" + user.username + "(" + user.id + ")`";
+    return '`U:' + user.username + '(' + user.id + ')`';
 }
 
 function getMemberStr(member) {
