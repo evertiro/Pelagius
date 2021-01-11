@@ -168,6 +168,17 @@ client.on('message', async (message) => {
     }
 });
 
+async function updateFile(guild, fileType, url) {
+    await archiveIfNeeded(guild, fileType);
+    console.log("File possibly archived.");
+    return 1;
+}
+
+async function archiveIfNeeded(guild, fileType) {
+    let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
+    return fs.promises.access(filePath, fs.constants.F_OK).then(() => archiveFile(guild, fileType)).catch(() => {});
+}
+
 async function archiveFile(guild, fileType) {
     let folder = './data/' + guild.id + '/archive/' + fileType;
     let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
