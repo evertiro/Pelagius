@@ -15,13 +15,13 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity('a game');
 
-    client.channels.cache.get(logChannel).send('Bot starting...');
+    logMessage('Bot starting...');
     setup();
 });
 
 // Add guild owner to staff list when bot joins a new server
 client.on('guildCreate', (guild) => {
-    client.channels.cache.get(logChannel).send('Bot joined a new guild: ' + guild);
+    logMessage('Bot joined a new guild: ' + guild);
     staffUsers.set(guild.id, [guild.ownerID]);
     createDirectory('./data/' + guild.id);
     saveStaff(guild);
@@ -172,6 +172,7 @@ function addApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.push(channelID);
     approvedChannels.set(guild.id, guildChannels);
+    logMessage(getChannelStr(getChannel(channelID)) + ' added as an approved channel.');
     saveChannels(guild);
 }
 
@@ -179,6 +180,7 @@ function removeApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.splice(guildChannels.indexOf(channelID), 1);
     approvedChannels.set(guild.id, guildChannels);
+    logMessage(getChannelStr(getChannel(channelID)) + ' removed as an approved channel.');
     saveChannels(guild);
 }
 
@@ -191,6 +193,7 @@ function addStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.push(userID);
     staffUsers.set(guild.id, guildStaff);
+    logMessage(getMemberStrFromId(guild, userID) + ' added as a staff member.');
     saveStaff(guild);
 }
 
@@ -198,6 +201,7 @@ function removeStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.splice(guildStaff.indexOf(userID), 1);
     staffUsers.set(guild.id, guildStaff);
+    logMessage(getMemberStrFromId(guild, userID) + ' removed as a staff member.');
     saveStaff(guild);
 }
 
@@ -246,7 +250,7 @@ function loadChannels(guild) {
         // Now try to read the file
         fs.readFile('./data/' + guild.id + '/channels.dat', 'utf8', (err, data) => {
             if (err) {
-                client.channels.cache.get(logChannel).send('Error: could not read `./data/' + guild.id + '/channels.dat`: \n' + err);
+                logMessage('Error: could not read `./data/' + guild.id + '/channels.dat`: \n' + err);
                 console.log('Error: could not read \'./data/' + guild.id + '/channels.dat\'');
             } else {
                 // Split file by comma, create a new list and add to Map
@@ -255,7 +259,7 @@ function loadChannels(guild) {
                     guildChannels.push(channelID);
                 });
                 approvedChannels.set(guild.id, guildChannels);
-                client.channels.cache.get(logChannel).send('Loaded approved channels from guild `' + guild.id + '` to memory');
+                logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
             }
         });
     });
@@ -272,7 +276,7 @@ function loadStaff(guild) {
             // Now try to read the file
             fs.readFile('./data/' + guild.id + '/staff.dat', 'utf8', (err, data) => {
                 if (err) {
-                    client.channels.cache.get(logChannel).send('Error: could not read `./data/' + guild.id + '/staff.dat`: \n' + err);
+                    logMessage('Error: could not read `./data/' + guild.id + '/staff.dat`: \n' + err);
                     console.log('Error: could not read \'./data/' + guild.id + '/staff.dat\'');
                 } else {
                     // Split file by comma, create a new list and add to Map
@@ -281,7 +285,7 @@ function loadStaff(guild) {
                         guildStaff.push(userID);
                     });
                     staffUsers.set(guild.id, guildStaff);
-                    client.channels.cache.get(logChannel).send('Loaded staff members from guild `' + guild.id + '` to memory');
+                    logMessage('Loaded staff members from ' + getGuildStr(guild) + ' to memory');
                 }
             });
         }
@@ -293,10 +297,10 @@ function saveChannels(guild) {
     // Turn it to a string, write it to file
     fs.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id)).toString(), (err) => {
         if (err) {
-            client.channels.cache.get(logChannel).send('Error: could not write approvedChannels to `./data/' + guild.id + '/channels.dat`\n' + err);
+            logMessage('Error: could not write approvedChannels to `./data/' + guild.id + '/channels.dat`\n' + err);
             console.log('Error: could not write approvedChannels to \'./data/' + guild.id + '/channels.dat\'\n' + err);
         } else {
-            client.channels.cache.get(logChannel).send('Wrote approvedChannels to `./data/' + guild.id + '/channels.dat`');
+            logMessage('Wrote approvedChannels to `./data/' + guild.id + '/channels.dat`');
         }
     });
 }
@@ -306,12 +310,63 @@ function saveStaff(guild) {
     // Turn it to a string, write it to file
     fs.writeFile('./data/' + guild.id + '/staff.dat', Array.from(staffUsers.get(guild.id)).toString(), (err) => {
         if (err) {
-            client.channels.cache.get(logChannel).send('Error: could not write staffUsers to `./data/' + guild.id + '/staff.dat`\n' + err);
+            logMessage('Error: could not write staffUsers to `./data/' + guild.id + '/staff.dat`\n' + err);
             console.log('Error: could not write staffUsers to \'./data/' + guild.id + 'staff.dat\'\n' + err);
         } else {
-            client.channels.cache.get(logChannel).send('Wrote staffUsers to `./data/' + guild.id + '/staff.dat`');
+            logMessage('Wrote staffUsers to `./data/' + guild.id + '/staff.dat`');
         }
     });
+}
+
+function logMessage(msg) {
+    getChannel(logChannel).send(msg);
+}
+
+function getGuildStr(guild) {
+    return "`G:" + guild.name + "(" + guild.id + ")`";
+}
+
+function getChannel(id) {
+    return client.channels.cache.get(id);
+}
+
+function getChannelStr(channel) {
+    let type = channel.type;
+    let ret = "`";
+    if (type === "text")
+        ret += "TC";
+    else if (type === "voice")
+        ret += "VC";
+    else if (type === "dm")
+        ret += "DM";
+    else if (type === "news")
+        ret += "NC";
+    else
+        ret += "C";
+    
+    ret += ":" + channel.name + "(" + channel.id + ") / " + getGuildStr(channel.guild) + "`";
+    return ret;
+}
+
+function getMember(guild, id) {
+    return guild.members.cache.get(id);
+}
+
+function getUserStr(user) {
+    return "`U:" + user.username + "(" + user.id + ")`";
+}
+
+function getMemberStr(member) {
+    let guild = member.guild;
+    let user = member.user;
+    let nick = member.nickname;
+    if (nick === null)
+        nick = user.username;
+    return "`MB:" + nick + "(" + getUserStr(user) + " / " + getGuildStr(guild) + ")`";
+}
+
+function getMemberStrFromId(guild, id) {
+    return getMemberStr(getMember(guild, id));
 }
 
 client.login(token);
