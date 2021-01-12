@@ -5,7 +5,7 @@ const fs = require('fs');
 const https = require('https');
 
 const token = process.env.BOT_TOKEN;
-const logChannel = '765326262616719366';
+const logChannel = '798668220873703474';
 const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
 
 var staffUsers = new Map();
@@ -70,7 +70,7 @@ client.on('message', async (message) => {
         return;
     }
 
-    let args = message.content.split(' ');
+    let args = message.content..toLowerCase().split(' ');
     if (args.length === 1) {
         if (!isApprovedChannel(message.guild, message.channel.id))
             return;
