@@ -223,21 +223,21 @@ client.on('message', async (message) => {
 
         if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder file`:\n' +
-                '`!loadorder file [file] update`: Updates the specified file\n' +
-                '`!loadorder file [file] archive`: Archives the current specified file (rarely used)\n' +
-                '`!loadorder file [file] retrieve`: Retrieves and sends the specified file in a discord message attachment\n\n' +
+                '`!loadorder file update [file]`: Updates the specified file\n' +
+                '`!loadorder file archive [file]`: Archives the current specified file (rarely used)\n' +
+                '`!loadorder file retrieve [file]`: Retrieves and sends the specified file in a discord message attachment\n\n' +
                 'Possible files:\n' +
                 fileTypes.toString());
             return;
         }
 
-        if (!isValidFile(args[1])) {
-            message.channel.send('Unknown file type: `' + args[1] + '`. Known files types:\n' +
+        if (!isValidFile(args[2])) {
+            message.channel.send('Unknown file type: `' + args[2] + '`. Known files types:\n' +
                 'loadorder\nskip\nreasons\nloot');
             return;
         }
 
-        if (args[2] === 'update') {
+        if (args[1] === 'update') {
             if (message.attachments.size !== 1) {
                 message.channel.send('Message must contain exactly 1 attachment, got ' + message.attachments.size);
                 return;
@@ -246,18 +246,18 @@ client.on('message', async (message) => {
             let url = attachment.url;
 
 
-            updateFile(message.guild, args[1], url).then(() => {
+            updateFile(message.guild, args[2], url).then(() => {
                 message.channel.send('File has been sucessfully updated.');
-                logMessage('The ' + args[1] + ' file has been updated in ' + getGuildStr(message.guild));
+                logMessage('The ' + args[2] + ' file has been updated in ' + getGuildStr(message.guild));
             }).catch((err) => {
                 message.channel.send('Something went wrong trying to update the file, contact Robotic!');
-                logMessage('FATAL: Something broke trying to update ' + args[1] + ' in ' + getGuildStr(message.guild));
+                logMessage('FATAL: Something broke trying to update ' + args[2] + ' in ' + getGuildStr(message.guild));
                 console.log(err);
             });
-        } else if (args[2] === 'archive') {
-            archiveIfNeeded(message.guild, args[1]).then(() => {
-                message.channel.send('The ' + args[1] + ' file has been successfully archived.');
-                logMessage('The ' + args[1] + ' file has been archived in ' + getGuildStr(message.guild));
+        } else if (args[1] === 'archive') {
+            archiveIfNeeded(message.guild, args[2]).then(() => {
+                message.channel.send('The ' + args[2] + ' file has been successfully archived.');
+                logMessage('The ' + args[2] + ' file has been archived in ' + getGuildStr(message.guild));
             })
         }
     }
