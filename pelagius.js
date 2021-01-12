@@ -101,7 +101,7 @@ client.on('message', async (message) => {
             }).catch(() => {
                 message.channel.send('Failed to add <#' + message.channel.id + '> to the list of approved channels, contact Robotic');
             });
-            
+
         } else if (args[1] === 'remove') {
             if (!isApprovedChannel(message.guild, message.channel.id)) {
                 message.channel.send('<#' + message.channel.id + '> is not an approved channel');
@@ -113,7 +113,7 @@ client.on('message', async (message) => {
             }).catch(() => {
                 message.channel.send('Failed to remove <#' + message.channel.id + '> from the list of approved channels, contact Robotic');
             });
-            
+
         } else if (args[1] === 'status') {
             message.channel.send('<#' + message.channel.id + '> is' + (isApprovedChannel(message.guild, message.channel.id) ? '' : ' not') + ' an approved channel');
         } else if (args[1] === 'list') {
@@ -164,7 +164,7 @@ client.on('message', async (message) => {
             }).catch(() => {
                 message.channel.send('Failed to add ' + user.user.username + ' to the staff list, contact Robotic');
             });
-            
+
         } else if (args[1] === 'remove') {
             if (message.mentions.members.array().length != 1) {
                 message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
@@ -191,7 +191,7 @@ client.on('message', async (message) => {
             }).catch(() => {
                 message.channel.send('Failed to remove ' + user.user.username + ' from the staff list, contact Robotic');
             });
-            
+
         } else if (args[1] === 'list') {
             let response = 'List of staff members:\n';
             // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
@@ -238,7 +238,7 @@ client.on('message', async (message) => {
             let attachment = message.attachments.first();
             let url = attachment.url;
 
-            
+
             updateFile(message.guild, args[1], url).then(() => {
                 message.channel.send('File has been sucessfully updated.');
                 logMessage('The ' + args[1] + ' file has been updated in ' + getGuildStr(message.guild));
@@ -261,6 +261,38 @@ client.on('message', async (message) => {
     }
 });
 
+function setup() {
+    client.guilds.cache.forEach((guild) => {
+        createDirectory('./data/' + guild.id).then(() => {
+            loadChannels(guild).catch((err) => {
+                logMessage('Error: Failed to load channels for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
+            loadStaff(guild).catch((err) => {
+                logMessage('Error: Failed to load staff for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
+            loadSettings(guild).catch((err) => {
+                logMessage('Error: Failed to load settings for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
+        });
+    });
+}
+
+function isStaff(guild, userID) {
+    let guildStaff = staffUsers.get(guild.id);
+    return guildStaff.includes(userID);
+}
+
+function isInGuild(guild, channelID) {
+    return guild.channels.cache.get(channelID) !== undefined;
+}
+
+function isValidFile(fileType) {
+    return fileTypes.includes(fileType);
+}
+
 async function updateFile(guild, fileType, url) {
     await archiveIfNeeded(guild, fileType);
     let file = fs.createWriteStream('./data/' + guild.id + '/' + getFileNameFromFileType(fileType));
@@ -277,7 +309,7 @@ async function updateFile(guild, fileType, url) {
 
 async function archiveIfNeeded(guild, fileType) {
     let filePath = './data/' + guild.id + '/' + getFileNameFromFileType(fileType);
-    return fs.promises.access(filePath, fs.constants.F_OK).then(() => archiveFile(guild, fileType)).catch(() => {});
+    return fs.promises.access(filePath, fs.constants.F_OK).then(() => archiveFile(guild, fileType)).catch(() => { });
 }
 
 async function archiveFile(guild, fileType) {
@@ -359,37 +391,7 @@ async function removeStaff(guild, userID) {
     });
 }
 
-function isStaff(guild, userID) {
-    let guildStaff = staffUsers.get(guild.id);
-    return guildStaff.includes(userID);
-}
 
-function isInGuild(guild, channelID) {
-    return guild.channels.cache.get(channelID) !== undefined;
-}
-
-function isValidFile(fileType) {
-    return fileTypes.includes(fileType);
-}
-
-function setup() {
-    client.guilds.cache.forEach((guild) => {
-        createDirectory('./data/' + guild.id).then(() => {
-            loadChannels(guild).catch((err) => {
-                logMessage('Error: Failed to load channels for ' + getGuildStr(guild) + '\n' + err);
-                console.log(err);
-            });
-            loadStaff(guild).catch((err) => {
-                logMessage('Error: Failed to load staff for ' + getGuildStr(guild) + '\n' + err);
-                console.log(err);
-            });
-            loadSettings(guild).catch((err) => {
-                logMessage('Error: Failed to load settings for ' + getGuildStr(guild) + '\n' + err);
-                console.log(err);
-            });
-        });
-    });
-}
 
 async function createDirectory(path) {
     return fs.promises.mkdir(path, { recursive: true });
@@ -486,7 +488,7 @@ function getChannelStr(channel) {
         ret += 'NC';
     else
         ret += 'C';
-    
+
     ret += ':' + channel.name + '(' + channel.id + ') / ' + getGuildStr(channel.guild) + '`';
     return ret;
 }
