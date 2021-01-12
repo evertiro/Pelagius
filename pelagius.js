@@ -91,11 +91,29 @@ client.on('message', async (message) => {
         }
 
         if (args[1] === 'add') {
-            addApprovedChannel(message.guild, message.channel.id);
-            message.channel.send('Added <#' + message.channel.id + '> to the list of approved channels.');
+            if (isApprovedChannel(message.guild, message.channel.id)) {
+                message.channel.send('<#' + message.channel.id + '> is already an approved channel');
+                return;
+            }
+
+            addApprovedChannel(message.guild, message.channel.id).then(() => {
+                message.channel.send('Added <#' + message.channel.id + '> to the list of approved channels');
+            }).catch(() => {
+                message.channel.send('Failed to add <#' + message.channel.id + '> to the list of approved channels, contact Robotic');
+            });
+            
         } else if (args[1] === 'remove') {
-            removeApprovedChannel(message.guild, message.channel.id);
-            message.channel.send('Removed <#' + message.channel.id + '> from the list of approved channels.');
+            if (!isApprovedChannel(message.guild, message.channel.id)) {
+                message.channel.send('<#' + message.channel.id + '> is not an approved channel');
+                return;
+            }
+
+            removeApprovedChannel(message.guild, message.channel.id).then(() => {
+                message.channel.send('Removed <#' + message.channel.id + '> from the list of approved channels');
+            }).catch(() => {
+                message.channel.send('Failed to remove <#' + message.channel.id + '> from the list of approved channels, contact Robotic');
+            });
+            
         } else if (args[1] === 'status') {
             message.channel.send('<#' + message.channel.id + '> is' + (isApprovedChannel(message.guild, message.channel.id) ? '' : ' not') + ' an approved channel');
         } else if (args[1] === 'list') {
@@ -135,8 +153,18 @@ client.on('message', async (message) => {
                 return;
             }
             let user = message.mentions.members.first();
-            addStaff(message.guild, user.id);
-            message.channel.send('Added ' + user.user.username + ' to the staff list');
+
+            if (isStaff(message.guild, user.id)) {
+                message.channel.send('That user is already staff');
+                return;
+            }
+
+            addStaff(message.guild, user.id).then(() => {
+                message.channel.send('Added ' + user.user.username + ' to the staff list');
+            }).catch(() => {
+                message.channel.send('Failed to add ' + user.user.username + ' to the staff list, contact Robotic');
+            });
+            
         } else if (args[1] === 'remove') {
             if (message.mentions.members.array().length != 1) {
                 message.channel.send('This command must ping (mention) exactly 1 user, found ' + message.mentions.members.array().length);
@@ -147,8 +175,23 @@ client.on('message', async (message) => {
                 message.channel.send('That user cannot be removed from staff, they are the server owner');
                 return;
             }
-            removeStaff(message.guild, user.id);
-            message.channel.send('Removed ' + user.user.username + ' from the staff list');
+
+            if (user.id === message.author.id) {
+                message.channel.send('You cannot remove yourself as staff');
+                return;
+            }
+
+            if (!isStaff(message.guild, user.id)) {
+                message.channel.send('That user is not staff');
+                return;
+            }
+
+            removeStaff(message.guild, user.id).then(() => {
+                message.channel.send('Removed ' + user.user.username + ' from the staff list');
+            }).catch(() => {
+                message.channel.send('Failed to remove ' + user.user.username + ' from the staff list, contact Robotic');
+            });
+            
         } else if (args[1] === 'list') {
             let response = 'List of staff members:\n';
             // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
@@ -247,27 +290,35 @@ async function archiveFile(guild, fileType) {
     return fs.promises.rename(filePath, folder + '/' + fileType + '_' + time + getExtensionFromFileType(fileType));
 }
 
-function addApprovedChannel(guild, channelID) {
+async function addApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.push(channelID);
     approvedChannels.set(guild.id, guildChannels);
-    saveChannels(guild).then(() => {
-        logMessage(getChannelStr(getChannel(channelID)) + ' added as an approved channel');
-    }).catch((err) => {
-        logMessage('Error: Failed to save adding ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
-        console.log(err);
+    return new Promise((resolve, reject) => {
+        saveChannels(guild).then(() => {
+            logMessage(getChannelStr(getChannel(channelID)) + ' added as an approved channel');
+            resolve();
+        }).catch((err) => {
+            logMessage('Error: Failed to save adding ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
+            console.log(err);
+            reject();
+        });
     });
 }
 
-function removeApprovedChannel(guild, channelID) {
+async function removeApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.splice(guildChannels.indexOf(channelID), 1);
     approvedChannels.set(guild.id, guildChannels);
-    saveChannels(guild).then(() => {
-        logMessage(getChannelStr(getChannel(channelID)) + ' removed as an approved channel');
-    }).catch((err) => {
-        logMessage('Error: Failed to save removing ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
-        console.log(err);
+    return new Promise((resolve, reject) => {
+        saveChannels(guild).then(() => {
+            logMessage(getChannelStr(getChannel(channelID)) + ' removed as an approved channel');
+            resolve();
+        }).catch((err) => {
+            logMessage('Error: Failed to save removing ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
+            console.log(err);
+            reject();
+        });
     });
 }
 
@@ -276,28 +327,35 @@ function isApprovedChannel(guild, channelID) {
     return guildChannels.includes(channelID);
 }
 
-function addStaff(guild, userID) {
+async function addStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.push(userID);
     staffUsers.set(guild.id, guildStaff);
-    saveStaff(guild).then(() => {
-        logMessage(getMemberStrFromId(guild, userID) + ' added as a staff member');
-    }).catch((err) => {
-        logMessage('Error: Failed to save adding ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
-        console.log(err);
+    return new Promise((resolve, reject) => {
+        saveStaff(guild).then(() => {
+            logMessage(getMemberStrFromId(guild, userID) + ' added as a staff member');
+            resolve();
+        }).catch((err) => {
+            logMessage('Error: Failed to save adding ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
+            console.log(err);
+            reject();
+        });
     });
 }
 
-function removeStaff(guild, userID) {
+async function removeStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.splice(guildStaff.indexOf(userID), 1);
     staffUsers.set(guild.id, guildStaff);
-    
-    saveStaff(guild).then(() => {
-        logMessage(getMemberStrFromId(guild, userID) + ' removed as a staff member');
-    }).catch((err) => {
-        logMessage('Error: Failed to save removing ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
-        console.log(err);
+    return new Promise((resolve, reject) => {
+        saveStaff(guild).then(() => {
+            logMessage(getMemberStrFromId(guild, userID) + ' removed as a staff member');
+            resolve();
+        }).catch((err) => {
+            logMessage('Error: Failed to save removing ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
+            console.log(err);
+            reject();
+        });
     });
 }
 
@@ -343,11 +401,11 @@ async function loadChannels(guild) {
         data.split(',').forEach((userID) => {
             guildChannels.push(userID);
         });
-        staffUsers.set(guild.id, guildChannels);
+        approvedChannels.set(guild.id, guildChannels);
         logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
     }).catch(() => {
-        staffUsers.set(guild.id, [guild.ownerID]);
-        saveStaff(guild).then(() => {
+        approvedChannels.set(guild.id, [guild.ownerID]);
+        saveChannels(guild).then(() => {
             logMessage('Saved approvedChannels for ' + getGuildStr(guild));
         }).catch((err) => {
             logMessage('Error: Failed to save approvedChannels for ' + getGuildStr(guild) + '\n' + err);
@@ -447,7 +505,7 @@ function getMemberStr(member) {
     let nick = member.nickname;
     if (nick === null)
         nick = user.username;
-    return '`MB:' + nick + '(' + getUserStr(user) + ' / ' + getGuildStr(guild) + ')`';
+    return '`MB:' + nick + '(`' + getUserStr(user) + '` / `' + getGuildStr(guild) + '`)`';
 }
 
 function getMemberStrFromId(guild, id) {
