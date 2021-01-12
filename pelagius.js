@@ -53,9 +53,11 @@ client.on('ready', () => {
 // Add guild owner to staff list when bot joins a new server
 client.on('guildCreate', (guild) => {
     logMessage('Bot joined a new guild: ' + getGuildStr(guild));
-    staffUsers.set(guild.id, [guild.ownerID]);
-    createDirectory('./data/' + guild.id);
-    saveStaff(guild);
+    createDirectory('./data/' + guild.id).then(() => {
+        loadStaff(guild);
+        loadChannels(guild);
+        loadSettings(guild);
+    });
 });
 
 client.on('message', async (message) => {
