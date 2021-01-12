@@ -6,7 +6,7 @@ const https = require('https');
 
 const token = process.env.BOT_TOKEN;
 const logChannel = '765326262616719366';
-const fileTypes = ['loadorder', 'skip', 'reasons', 'loot'];
+const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
@@ -279,7 +279,7 @@ client.on('message', async (message) => {
 
         if (!isValidFile(args[2])) {
             message.channel.send('Unknown file type: `' + args[2] + '`. Known files types:\n' +
-                'loadorder\nskip\nreasons\nloot');
+                'loadorder\nskips\nreasons\nloot');
             return;
         }
 
@@ -540,7 +540,7 @@ async function loadChannels(guild) {
         approvedChannels.set(guild.id, guildChannels);
         logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
     }).catch(() => {
-        approvedChannels.set(guild.id, [guild.ownerID]);
+        approvedChannels.set(guild.id, []);
         saveChannels(guild).then(() => {
             logMessage('Saved approvedChannels for ' + getGuildStr(guild));
         }).catch((err) => {
