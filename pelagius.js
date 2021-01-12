@@ -122,7 +122,6 @@ client.on('message', async (message) => {
             message.channel.send('Master loadorder file does not exist');
             return;
         });
-        
         return;
     }
     args = args.slice(1, args.length);
@@ -270,9 +269,9 @@ client.on('message', async (message) => {
 
         if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder file`:\n' +
-                '`!loadorder file update [file]`: Updates the specified file\n' +
-                '`!loadorder file archive [file]`: Archives the current specified file (rarely used)\n' +
-                '`!loadorder file retrieve [file]`: Retrieves and sends the specified file in a discord message attachment\n\n' +
+                '`!loadorder file update [file]` - Updates the specified file\n' +
+                '`!loadorder file archive [file]` - Archives the current specified file (rarely used)\n' +
+                '`!loadorder file retrieve [file]` - Retrieves and sends the specified file in a discord message attachment\n\n' +
                 'Possible files:\n' +
                 fileTypes.toString());
             return;
@@ -296,6 +295,18 @@ client.on('message', async (message) => {
             updateFile(message.guild, args[2], url).then(() => {
                 message.channel.send('File has been sucessfully updated.');
                 logMessage('The ' + args[2] + ' file has been updated in ' + getGuildStr(message.guild));
+
+                if (args[2] === 'loadorder') {
+                    settings.get(message.guild.id).enabled = true;
+                    saveSettings(message.guild).then(() => {
+                        message.channel.send('Resumed loadorder validation');
+                        logMessage('Loadorder validation was resumed in ' + getGuildStr(message.guild));
+                    }).catch((err) => {
+                        message.channel.send('Something went wrong trying to resume validation, contact Robotic');
+                        logMessage('Error: Failed to resume validation in ' + getGuildStr(message.guild) + '\n' + err);
+                        console.log(err);
+                    });
+                }
             }).catch((err) => {
                 message.channel.send('Something went wrong trying to update the file, contact Robotic!');
                 logMessage('FATAL: Something broke trying to update ' + args[2] + ' in ' + getGuildStr(message.guild) + '\n' + err);
@@ -317,6 +328,56 @@ client.on('message', async (message) => {
                     message.channel.send('Here is the current ' + args[2] + ' file', attachment);
                 }
             })
+        }
+    } else if (args[0] === 'settings') {
+        if (!isStaff(message.guild, message.author.id)) {
+            return;
+        }
+
+        if (args.length === 1) {
+            message.channel.send('Subcommands of `!loadorder settings`:\n' +
+                '`!loadorder settings pause` - Pauses validation\n' +
+                '`!loadorder settings resume` - Resumes validation\n' +
+                '`!loadorder settings path [path]` - Sets the loadorder file path for users');
+            return;
+        }
+
+        if (args[1] === 'pause') {
+            settings.get(message.guild.id).enabled = false;
+            saveSettings(message.guild).then(() => {
+                message.channel.send('Paused loadorder validation');
+                logMessage('Loadorder validation was paused in ' + getGuildStr(message.guild));
+            }).catch((err) => {
+                message.channel.send('Something went wrong trying to pause validation, contact Robotic');
+                logMessage('Error: Failed to pause validation in ' + getGuildStr(message.guild) + '\n' + err);
+                console.log(err);
+            });
+        } else if (args[1] === 'resume') {
+            settings.get(message.guild.id).enabled = true;
+            saveSettings(message.guild).then(() => {
+                message.channel.send('Resumed loadorder validation');
+                logMessage('Loadorder validation was resumed in ' + getGuildStr(message.guild));
+            }).catch((err) => {
+                message.channel.send('Something went wrong trying to resume validation, contact Robotic');
+                logMessage('Error: Failed to resume validation in ' + getGuildStr(message.guild) + '\n' + err);
+                console.log(err);
+            });
+        } else if (args[1] === 'path') {
+            if (args.length === 2) {
+                message.channel.send('Usage: `!loadorder settings path [path]`');
+                return;
+            }
+
+            let newPath = args.slice(2, args.length).join(' ');
+            settings.get(message.guild.id).path = newPath;
+            saveSettings(message.guild).then(() => {
+                message.channel.send('Updated loadorder file path');
+                logMessage('Loadorder file path was updated in ' + getGuildStr(message.guild));
+            }).catch((err) => {
+                message.channel.send('Something went wrong trying to update loadorder file path, contact Robotic');
+                logMessage('Error: Failed to update loadorder file path in ' + getGuildStr(message.guild) + '\n' + err);
+                console.log(err);
+            });
         }
     }
 });
@@ -343,10 +404,6 @@ function setup() {
 function isStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     return guildStaff.includes(userID);
-}
-
-function isInGuild(guild, channelID) {
-    return guild.channels.cache.get(channelID) !== undefined;
 }
 
 function isValidFile(fileType) {
@@ -538,9 +595,6 @@ async function prepCompare(guild, content) {
         reasonJSON = JSON.parse('{}');
     }
 
-    console.log(skipLines);
-    console.log(reasonJSON);
-
     return compare(guild, content, skipLines, reasonJSON);
 }
 
@@ -616,7 +670,7 @@ function getChannelStr(channel) {
     else
         ret += 'C';
 
-    ret += ':' + channel.name + '(' + channel.id + ') / ' + getGuildStr(channel.guild) + '`';
+    ret += ':' + channel.name + '(' + channel.id + ') / `' + getGuildStr(channel.guild) + '';
     return ret;
 }
 
