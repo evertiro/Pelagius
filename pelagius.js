@@ -70,7 +70,7 @@ client.on('message', async (message) => {
         return;
     }
 
-    let args = message.content..toLowerCase().split(' ');
+    let args = message.content.toLowerCase().split(' ');
     if (args.length === 1) {
         if (!isApprovedChannel(message.guild, message.channel.id))
             return;
