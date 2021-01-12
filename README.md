@@ -26,6 +26,8 @@ Basically it lets your users upload a loadorder.txt file and compare it to a mas
   plugin is missing or extra
 * Old versions of uploaded staff files are automatically archived
 * Properly supports multiple Discord servers, keeping staff lists and master files separate
+* User help info can be found by running '!loadorder help' in an approved channel
+* A full list of staff commands can be found by running '!loadorder staffhelp'
 
 How do I set it up?
 ---------------
