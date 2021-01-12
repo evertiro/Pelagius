@@ -10,6 +10,37 @@ const fileTypes = ['loadorder', 'skip', 'reasons', 'loot'];
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
+var settings = new Map();
+
+class Settings {
+    enabled;
+    path;
+
+    constructor(enabled, path) {
+        this.enabled = enabled;
+        this.path = path;
+    }
+
+    toString() {
+        return this.enabled + '\n' + this.path;
+    }
+
+    get enabled() {
+        return this.enabled;
+    }
+
+    set enabled(bool) {
+        this.enabled = bool;
+    }
+
+    get path() {
+        return this.path;
+    }
+
+    set path(str) {
+        this.path = str;
+    }
+}
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -269,6 +300,10 @@ function setup() {
         createDirectory('./data/' + guild.id).then(() => {
             loadChannels(guild);
             loadStaff(guild);
+            loadSettings(guild).catch((err) => {
+                logMessage('Error: Failed to load settings for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
         });
     });
 }
@@ -332,6 +367,22 @@ function loadStaff(guild) {
     });
 }
 
+async function loadSettings(guild) {
+    return fs.promises.readFile('./data/' + guild.id + '/settings.dat', 'utf8').then((data) => {
+        let lines = data.toString().split(/\r?\n/);
+        settings.set(guild.id, new Settings(lines[0], lines[1]));
+        logMessage('Loaded settings for ' + getGuildStr(guild) + ' to memory');
+    }).catch((err) => {
+        settings.set(guild.id, new Settings(true, 'MO2/profiles/[profile]/loadorder.txt'));
+        saveSettings(guild).then(() => {
+            logMessage('Created new settings for ' + getGuildStr(guild));
+        }).catch((err) => {
+            logMessage('Failed to save newly created settings for ' + getGuildStr(guild));
+            console.log(err);
+        });
+    });
+}
+
 function saveChannels(guild) {
     // Get the array value connected to the guild id key
     // Turn it to a string, write it to file
@@ -356,6 +407,10 @@ function saveStaff(guild) {
             logMessage('Wrote staffUsers to `./data/' + guild.id + '/staff.dat`');
         }
     });
+}
+
+async function saveSettings(guild) {
+    return fs.promises.writeFile('./data/' + guild.id + '/settings.dat', settings.get(guild.id).toString());
 }
 
 function logMessage(msg) {
