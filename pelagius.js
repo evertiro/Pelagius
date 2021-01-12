@@ -392,11 +392,11 @@ async function loadSettings(guild) {
 }
 
 async function saveChannels(guild) {
-    return fs.promises.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id).toString()));
+    return fs.promises.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id)).toString());
 }
 
 async function saveStaff(guild) {
-    return fs.promises.writeFile('./data/' + guild.id + '/staff.dat', Array.from(staffUsers.get(guild.id).toString()));
+    return fs.promises.writeFile('./data/' + guild.id + '/staff.dat', Array.from(staffUsers.get(guild.id)).toString());
 }
 
 async function saveSettings(guild) {
