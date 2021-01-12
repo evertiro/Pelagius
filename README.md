@@ -46,8 +46,8 @@ Then, you need a master file
 And that's it, it's ready to run!
 
 If you want, you can also upload a "skips" and "reasons" file.
-The skips file will ignore all filenames listed on it (line-separated)
-The reasons file will provide reasons to your users as to why they shouldn't have a certain file (it needs to be in JSON)
+The skips file will ignore all filenames listed on it (line-separated).
+The reasons file will provide reasons to your users as to why they shouldn't have a certain file (it needs to be in JSON).
 
 I also suggest setting the loadorder path so your users know where to get the loadorder.txt file.
 To do this, run '!loadorder settings path [your path]'
