@@ -44,7 +44,7 @@ class Settings {
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity('a game');
+    client.user.setActivity('Bethesda games');
 
     logMessage('Bot starting...');
     setup();
@@ -66,7 +66,7 @@ client.on('message', async (message) => {
         return;
     }
 
-    if (!message.content.startsWith('!loadorder')) {
+    if (!message.content.toLowerCase().startsWith('!loadorder')) {
         return;
     }
 
