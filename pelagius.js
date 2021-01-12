@@ -17,7 +17,7 @@ class Settings {
     path;
 
     constructor(enabled, path) {
-        this.enabled = enabled;
+        this.enabled = (enabled == 'true');
         this.path = path;
     }
 
@@ -30,7 +30,7 @@ class Settings {
     }
 
     set enabled(bool) {
-        this.enabled = bool;
+        this.enabled = (bool == 'true');
     }
 
     get path() {
@@ -74,8 +74,55 @@ client.on('message', async (message) => {
     if (args.length === 1) {
         if (!isApprovedChannel(message.guild, message.channel.id))
             return;
-        // User checking loadorder
-        message.channel.send('TODO: Add help message');
+
+        fs.promises.access('./data/' + message.guild.id + '/loadorder.txt', fs.constants.R_OK).then(() => {
+            let guildSettings = settings.get(message.guild.id);
+            if (!guildSettings.enabled) {
+                message.channel.send('Loadorder validation is currently disabled');
+                return;
+            }
+
+            if (message.attachments.size != 1) {
+                message.channel.send('You must attach your loadorder file in the same message as `!loadorder`\n' +
+                                     'The file is located at `' + guildSettings.path + '`');
+                return;
+            }
+
+            if (message.attachments.first().name != 'loadorder.txt') {
+                message.channel.send('The file must be named `loadorder.txt`, you should drag and drop it directly from your MO2 installation');
+                return;
+            }
+
+            let url = message.attachments.first().url;
+            https.get(url, (response) => {
+                response.on('error', (err) => {
+                    message.channel.send('There was an error retrieving the file, contact Robotic');
+                    logMessage('Error: Failed to retrieve loadorder file from web in ' + getChannelStr(message.channel) + '\nURL: ' + url + '\n' + err);
+                    console.log(err);
+                });
+                
+                let content = '';
+                response.on('data', (chunk) => {
+                    content += chunk;
+                });
+
+                response.on('end', () => {
+                    prepCompare(message.guild, content).then((diffs) => {
+                        let buf = Buffer.from(diffs, 'utf8');
+                        let attachment = new Discord.MessageAttachment(buf, 'differences.txt');
+                        message.channel.send(message.author.toString() + ', here\'s what you need to fix:', attachment);
+                    }).catch((err) => {
+                        message.channel.send('There was an error comparing your loadorder, contact Robotic');
+                        logMessage('Error: Failed to compare loadorder in ' + getChannelStr(message.channel) + '\nURL: ' + url + '\n' + err);
+                        console.log(err);
+                    });
+                })
+            });
+        }).catch(() => {
+            message.channel.send('Master loadorder file does not exist');
+            return;
+        });
+        
         return;
     }
     args = args.slice(1, args.length);
@@ -251,7 +298,7 @@ client.on('message', async (message) => {
                 logMessage('The ' + args[2] + ' file has been updated in ' + getGuildStr(message.guild));
             }).catch((err) => {
                 message.channel.send('Something went wrong trying to update the file, contact Robotic!');
-                logMessage('FATAL: Something broke trying to update ' + args[2] + ' in ' + getGuildStr(message.guild));
+                logMessage('FATAL: Something broke trying to update ' + args[2] + ' in ' + getGuildStr(message.guild) + '\n' + err);
                 console.log(err);
             });
         } else if (args[1] === 'archive') {
@@ -404,8 +451,6 @@ async function removeStaff(guild, userID) {
     });
 }
 
-
-
 async function createDirectory(path) {
     return fs.promises.mkdir(path, { recursive: true });
 }
@@ -474,6 +519,75 @@ async function saveStaff(guild) {
 
 async function saveSettings(guild) {
     return fs.promises.writeFile('./data/' + guild.id + '/settings.dat', settings.get(guild.id).toString());
+}
+
+async function prepCompare(guild, content) {
+    let skipLines;
+    let reasonJSON;
+    try {
+        let skips = await fs.promises.readFile('./data/' + guild.id + '/skips.txt', 'utf8');
+        skipLines = skips.toLowerCase().split(/\r?\n/);
+    } catch (e) {
+        skipLines = [];
+    }
+
+    try {
+        let reasons = await fs.promises.readFile('./data/' + guild.id + '/reasons.json', 'uft8');
+        reasonJSON = JSON.parse(reasons);
+    } catch (e) {
+        reasonJSON = JSON.parse('{}');
+    }
+
+    console.log(skipLines);
+    console.log(reasonJSON);
+
+    return compare(guild, content, skipLines, reasonJSON);
+}
+
+async function compare(guild, content, skips, reasons) {
+    return new Promise((resolve, reject) => {
+        fs.promises.readFile('./data/' + guild.id + '/loadorder.txt', 'utf8').then((data) => {
+            let dataLines = data.toLowerCase().split(/\r?\n/);
+            let contentLines = content.toLowerCase().split(/\r?\n/);
+            let response = '';
+            let temp = 'Your load order is missing:\n';
+
+            dataLines.forEach((line) => {
+                if (!contentLines.includes(line)) {
+                    if (!skips.includes(line)) {
+                        temp += line + '\n';
+                    }
+                }
+            });
+
+            if (temp != 'Your loadorder is missing:\n')
+                response = temp;
+            
+            temp = '\nYour loadorder should not have:\n';
+            
+            contentLines.forEach((line) => {
+                if (!dataLines.includes(line)) {
+                    if (!skips.includes(line)) {
+                        temp += line;
+                    }
+
+                    if (reasons.hasOwnProperty(line)) {
+                        temp += reasons[line];
+                    }
+
+                    temp += '\n';
+                }
+            });
+
+            if (temp != '\nYour loadorder should not have:\n')
+                response += temp;
+            
+            resolve(response);
+
+        }).catch((err) => {
+            reject(err);
+        })
+    });
 }
 
 function logMessage(msg) {
