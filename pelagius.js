@@ -251,16 +251,24 @@ function addApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.push(channelID);
     approvedChannels.set(guild.id, guildChannels);
-    logMessage(getChannelStr(getChannel(channelID)) + ' added as an approved channel.');
-    saveChannels(guild);
+    saveChannels(guild).then(() => {
+        logMessage(getChannelStr(getChannel(channelID)) + ' added as an approved channel');
+    }).catch((err) => {
+        logMessage('Error: Failed to save adding ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
+        console.log(err);
+    });
 }
 
 function removeApprovedChannel(guild, channelID) {
     let guildChannels = approvedChannels.get(guild.id);
     guildChannels.splice(guildChannels.indexOf(channelID), 1);
     approvedChannels.set(guild.id, guildChannels);
-    logMessage(getChannelStr(getChannel(channelID)) + ' removed as an approved channel.');
-    saveChannels(guild);
+    saveChannels(guild).then(() => {
+        logMessage(getChannelStr(getChannel(channelID)) + ' removed as an approved channel');
+    }).catch((err) => {
+        logMessage('Error: Failed to save removing ' + getChannelStr(getChannel(channelID)) + ' as an approved channel\n' + err);
+        console.log(err);
+    });
 }
 
 function isApprovedChannel(guild, channelID) {
@@ -272,16 +280,25 @@ function addStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.push(userID);
     staffUsers.set(guild.id, guildStaff);
-    logMessage(getMemberStrFromId(guild, userID) + ' added as a staff member.');
-    saveStaff(guild);
+    saveStaff(guild).then(() => {
+        logMessage(getMemberStrFromId(guild, userID) + ' added as a staff member');
+    }).catch((err) => {
+        logMessage('Error: Failed to save adding ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
+        console.log(err);
+    });
 }
 
 function removeStaff(guild, userID) {
     let guildStaff = staffUsers.get(guild.id);
     guildStaff.splice(guildStaff.indexOf(userID), 1);
     staffUsers.set(guild.id, guildStaff);
-    logMessage(getMemberStrFromId(guild, userID) + ' removed as a staff member.');
-    saveStaff(guild);
+    
+    saveStaff(guild).then(() => {
+        logMessage(getMemberStrFromId(guild, userID) + ' removed as a staff member');
+    }).catch((err) => {
+        logMessage('Error: Failed to save removing ' + getMemberStrFromId(guild, userID) + ' as a staff member\n' + err);
+        console.log(err);
+    });
 }
 
 function isStaff(guild, userID) {
@@ -300,8 +317,14 @@ function isValidFile(fileType) {
 function setup() {
     client.guilds.cache.forEach((guild) => {
         createDirectory('./data/' + guild.id).then(() => {
-            loadChannels(guild);
-            loadStaff(guild);
+            loadChannels(guild).catch((err) => {
+                logMessage('Error: Failed to load channels for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
+            loadStaff(guild).catch((err) => {
+                logMessage('Error: Failed to load staff for ' + getGuildStr(guild) + '\n' + err);
+                console.log(err);
+            });
             loadSettings(guild).catch((err) => {
                 logMessage('Error: Failed to load settings for ' + getGuildStr(guild) + '\n' + err);
                 console.log(err);
@@ -314,59 +337,42 @@ async function createDirectory(path) {
     return fs.promises.mkdir(path, { recursive: true });
 }
 
-function loadChannels(guild) {
-    // Try to access the channels file for the guild
-    fs.access('./data/' + guild.id + '/channels.dat', fs.constants.F_OK, (err) => {
-        // If it errors, there's no file, set an empty one
-        if (err) {
-            approvedChannels.set(guild.id, []);
-            saveChannels(guild);
-            return;
-        }
-        // Now try to read the file
-        fs.readFile('./data/' + guild.id + '/channels.dat', 'utf8', (err, data) => {
-            if (err) {
-                logMessage('Error: could not read `./data/' + guild.id + '/channels.dat`: \n' + err);
-                console.log('Error: could not read \'./data/' + guild.id + '/channels.dat\'');
-            } else {
-                // Split file by comma, create a new list and add to Map
-                let guildChannels = [];
-                data.split(',').forEach((channelID) => {
-                    if (channelID !== '')
-                        guildChannels.push(channelID);
-                });
-                approvedChannels.set(guild.id, guildChannels);
-                logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
-            }
+async function loadChannels(guild) {
+    return fs.promises.readFile('./data/' + guild.id + '/channels.dat', 'utf8').then((data) => {
+        let guildChannels = [];
+        data.split(',').forEach((userID) => {
+            guildChannels.push(userID);
         });
-    });
+        staffUsers.set(guild.id, guildChannels);
+        logMessage('Loaded approved channels from ' + getGuildStr(guild) + ' to memory');
+    }).catch(() => {
+        staffUsers.set(guild.id, [guild.ownerID]);
+        saveStaff(guild).then(() => {
+            logMessage('Saved approvedChannels for ' + getGuildStr(guild));
+        }).catch((err) => {
+            logMessage('Error: Failed to save approvedChannels for ' + getGuildStr(guild) + '\n' + err);
+            console.log(err);
+        });
+    })
 }
 
-function loadStaff(guild) {
-    // Try to access the staff file for the guild
-    fs.access('./data/' + guild.id + '/staff.dat', fs.constants.F_OK, (err) => {
-        // If it errors there's no file and we need to populate with the server owner and save it
-        if (err) {
-            staffUsers.set(guild.id, [guild.ownerID]);
-            saveStaff(guild);
-        } else {
-            // Now try to read the file
-            fs.readFile('./data/' + guild.id + '/staff.dat', 'utf8', (err, data) => {
-                if (err) {
-                    logMessage('Error: could not read `./data/' + guild.id + '/staff.dat`: \n' + err);
-                    console.log('Error: could not read \'./data/' + guild.id + '/staff.dat\'');
-                } else {
-                    // Split file by comma, create a new list and add to Map
-                    let guildStaff = [];
-                    data.split(',').forEach((userID) => {
-                        guildStaff.push(userID);
-                    });
-                    staffUsers.set(guild.id, guildStaff);
-                    logMessage('Loaded staff members from ' + getGuildStr(guild) + ' to memory');
-                }
-            });
-        }
-    });
+async function loadStaff(guild) {
+    return fs.promises.readFile('./data/' + guild.id + '/staff.dat', 'utf8').then((data) => {
+        let guildStaff = [];
+        data.split(',').forEach((userID) => {
+            guildStaff.push(userID);
+        });
+        staffUsers.set(guild.id, guildStaff);
+        logMessage('Loaded staff members from ' + getGuildStr(guild) + ' to memory');
+    }).catch(() => {
+        staffUsers.set(guild.id, [guild.ownerID]);
+        saveStaff(guild).then(() => {
+            logMessage('Saved staff for ' + getGuildStr(guild));
+        }).catch((err) => {
+            logMessage('Error: Failed to save staffUsers for ' + getGuildStr(guild) + '\n' + err);
+            console.log(err);
+        });
+    })
 }
 
 async function loadSettings(guild) {
@@ -374,41 +380,23 @@ async function loadSettings(guild) {
         let lines = data.toString().split(/\r?\n/);
         settings.set(guild.id, new Settings(lines[0], lines[1]));
         logMessage('Loaded settings for ' + getGuildStr(guild) + ' to memory');
-    }).catch((err) => {
+    }).catch(() => {
         settings.set(guild.id, new Settings(true, 'MO2/profiles/[profile]/loadorder.txt'));
         saveSettings(guild).then(() => {
             logMessage('Created new settings for ' + getGuildStr(guild));
         }).catch((err) => {
-            logMessage('Failed to save newly created settings for ' + getGuildStr(guild));
+            logMessage('Error: Failed to save settings for ' + getGuildStr(guild) + '\n' + err);
             console.log(err);
         });
     });
 }
 
-function saveChannels(guild) {
-    // Get the array value connected to the guild id key
-    // Turn it to a string, write it to file
-    fs.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id)).toString(), (err) => {
-        if (err) {
-            logMessage('Error: could not write approvedChannels to `./data/' + guild.id + '/channels.dat`\n' + err);
-            console.log('Error: could not write approvedChannels to \'./data/' + guild.id + '/channels.dat\'\n' + err);
-        } else {
-            logMessage('Wrote approvedChannels to `./data/' + guild.id + '/channels.dat`');
-        }
-    });
+async function saveChannels(guild) {
+    return fs.promises.writeFile('./data/' + guild.id + '/channels.dat', Array.from(approvedChannels.get(guild.id).toString()));
 }
 
-function saveStaff(guild) {
-    // Get the array value connected to the guild id key
-    // Turn it to a string, write it to file
-    fs.writeFile('./data/' + guild.id + '/staff.dat', Array.from(staffUsers.get(guild.id)).toString(), (err) => {
-        if (err) {
-            logMessage('Error: could not write staffUsers to `./data/' + guild.id + '/staff.dat`\n' + err);
-            console.log('Error: could not write staffUsers to \'./data/' + guild.id + 'staff.dat\'\n' + err);
-        } else {
-            logMessage('Wrote staffUsers to `./data/' + guild.id + '/staff.dat`');
-        }
-    });
+async function saveStaff(guild) {
+    return fs.promises.writeFile('./data/' + guild.id + '/staff.dat', Array.from(staffUsers.get(guild.id).toString()));
 }
 
 async function saveSettings(guild) {
