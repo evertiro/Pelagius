@@ -259,6 +259,17 @@ client.on('message', async (message) => {
                 message.channel.send('The ' + args[2] + ' file has been successfully archived.');
                 logMessage('The ' + args[2] + ' file has been archived in ' + getGuildStr(message.guild));
             })
+        } else if (args[1] === 'retrieve') {
+            fs.readFile('./data/' + message.guild.id + '/' + getFileNameFromFileType(args[2]), (err, data) => {
+                if (err) {
+                    message.channel.send('Error: couldn\'t read the ' + args[2] + ' file, contact Robotic');
+                    logMessage('Error: Failed to read ' + args[2] + ' file in ' + getGuildStr(message.guild) + '\n' + err);
+                    console.log(err);
+                } else {
+                    let attachment = new Discord.MessageAttachment(data, getFileNameFromFileType(args[2]));
+                    message.channel.send('Here is the current ' + args[2] + ' file', attachment);
+                }
+            })
         }
     }
 });
