@@ -72,6 +72,9 @@ client.on('message', async (message) => {
 
     let args = message.content.split(' ');
     if (args.length === 1) {
+        if (!isApprovedChannel(message.guild, message.channel.id))
+            return;
+        // User checking loadorder
         message.channel.send('TODO: Add help message');
         return;
     }
@@ -214,6 +217,10 @@ client.on('message', async (message) => {
                 '`!loadorder staff list` - Lists the staff in the server');
         }
     } else if (args[0] === 'file') {
+        if (!isStaff(message.guild, message.author.id)) {
+            return;
+        }
+
         if (args.length === 1) {
             message.channel.send('Subcommands of `!loadorder file`:\n' +
                 '`!loadorder file [file] update`: Updates the specified file\n' +
@@ -253,11 +260,6 @@ client.on('message', async (message) => {
                 logMessage('The ' + args[1] + ' file has been archived in ' + getGuildStr(message.guild));
             })
         }
-    }
-
-    // User commands, only allowed in approved channels
-    if (!isApprovedChannel(message.guild, message.channel.id)) {
-        return;
     }
 });
 
