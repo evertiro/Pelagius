@@ -682,12 +682,10 @@ async function compare(guild, content, skips, reasons) {
                 if (!dataLines.includes(line)) {
                     if (!skips.includes(line)) {
                         temp += line;
+                        if (reasons.hasOwnProperty(line)) {
+                            temp += reasons[line];
+                        }
                     }
-
-                    if (reasons.hasOwnProperty(line)) {
-                        temp += reasons[line];
-                    }
-
                     temp += '\n';
                 }
             });
