@@ -405,6 +405,16 @@ client.on('message', async (message) => {
                 '`!loadorder settings` - Change bot settings\n' +
                 'All staff commands can be used in any channel');
         }
+    } else {
+        if (isApprovedChannel(message.guild, message.channel.id)) {
+            let path = settings.get(message.guild.id).path;
+            message.channel.send('This bot will validate your loadorder for you\n' +
+                'It does this by comparing your load order against a master list\n' +
+                'To use it, type `!loadorder` and upload your load order (in the same message)\n' +
+                'Your load order can be found at `' + path + '`\n' +
+                'I will respond with a text file containing what you need to change\n' +
+                'Some files may have explanations listed as to why you shouldn\'t have them');
+        }
     }
 });
 
