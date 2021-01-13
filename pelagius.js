@@ -462,7 +462,6 @@ async function updateFile(guild, fileType, url) {
             if (fileType == 'reasons') {
                 let content = '';
                 response.on('data', (chunk) => {
-                    console.log('Chunk: ' + chunk);
                     content += chunk;
                 });
 
@@ -666,6 +665,8 @@ async function compare(guild, content, skips, reasons) {
             let temp = 'Your loadorder is missing:\n';
 
             dataLines.forEach((line) => {
+                if (line.trim() == '')
+                    return;
                 if (!contentLines.includes(line)) {
                     if (!skips.includes(line)) {
                         temp += line + '\n';
@@ -679,14 +680,16 @@ async function compare(guild, content, skips, reasons) {
             temp = '\nYour loadorder should not have:\n';
             
             contentLines.forEach((line) => {
+                if (line.trim() == '')
+                    return;
                 if (!dataLines.includes(line)) {
                     if (!skips.includes(line)) {
                         temp += line;
                         if (reasons.hasOwnProperty(line)) {
                             temp += reasons[line];
                         }
+                        temp += '\n';
                     }
-                    temp += '\n';
                 }
             });
 
