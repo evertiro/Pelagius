@@ -308,6 +308,13 @@ client.on('message', async (message) => {
                     });
                 }
             }).catch((err) => {
+                if (err instanceof SyntaxError && args[2] === 'reasons') {
+                    archiveIfNeeded(message.guild, args[2]).then(() => {
+                        message.channel.send('Invalid JSON provided for reasons file, it has been automatically archived. Re-upload with valid JSON');
+                    });
+                    return;
+                }
+
                 message.channel.send('Something went wrong trying to update the file, contact Robotic!');
                 logMessage('FATAL: Something broke trying to update ' + args[2] + ' in ' + getGuildStr(message.guild) + '\n' + err);
                 console.log(err);
@@ -437,8 +444,27 @@ async function updateFile(guild, fileType, url) {
             response.on('error', (err) => {
                 reject(err);
             });
-            response.pipe(file);
-            resolve();
+
+            if (fileType == 'reasons') {
+                let content = '';
+                response.on('data', (chunk) => {
+                    console.log('Chunk: ' + chunk);
+                    content += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        let json = JSON.parse(content);
+                        response.pipe(file);
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            } else {
+                response.pipe(file);
+                resolve();
+            }
         });
     });
 }
