@@ -108,6 +108,10 @@ client.on('message', async (message) => {
 
                 response.on('end', () => {
                     prepCompare(message.guild, content).then((diffs) => {
+                        if (diffs === '') {
+                            message.channel.send(message.author.toString() + ', your loadorder matches the master list, no problems there!');
+                            return;
+                        }
                         let buf = Buffer.from(diffs, 'utf8');
                         let attachment = new Discord.MessageAttachment(buf, 'differences.txt');
                         message.channel.send(message.author.toString() + ', here\'s what you need to fix:', attachment);
@@ -659,7 +663,7 @@ async function compare(guild, content, skips, reasons) {
             let dataLines = data.toLowerCase().split(/\r?\n/);
             let contentLines = content.toLowerCase().split(/\r?\n/);
             let response = '';
-            let temp = 'Your load order is missing:\n';
+            let temp = 'Your loadorder is missing:\n';
 
             dataLines.forEach((line) => {
                 if (!contentLines.includes(line)) {
