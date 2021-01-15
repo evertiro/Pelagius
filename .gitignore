@@ -320,3 +320,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/vim,osx,node,linux,grunt,eclipse,windows,sublimetext,visualstudiocode
+
+# The following is added manually to ensure user configs for the bot are not
+# included in the repository accidentally
+data/
