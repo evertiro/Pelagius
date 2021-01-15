@@ -43,8 +43,8 @@ module.exports = function (grunt) {
         },
         src: [
           '**/CHANGELOG.md',
-          '!node_modules/**/*.md',
-          '!vendor/**/*.md'
+          '!node_modules/**/CHANGELOG.md',
+          '!vendor/**/CHANGELOG.md',
         ],
       },
     },
