@@ -1,0 +1,4 @@
+bot:
+  prefix: "!"
+  token: ""
+  log_channel: ""
