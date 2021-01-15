@@ -66,7 +66,9 @@ If you want, you can also upload a "skips" and "reasons" file using the command
   your users as to why they shouldn't have a certain file (it needs to be JSON)
 
 I also suggest setting the loadorder path so your users know where to get the
-loadorder.txt file. To do this, run `!loadorder settings path [c:\your\path]`
+loadorder.txt file. You should probably pick a path relative to a user's MO2
+install location, such as `MO2/profiles/[your profile]/loadorder.txt`. 
+To do this, run `!loadorder settings path [your path]`
 
 ## Necessary setup for development testing
 
