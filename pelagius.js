@@ -7,6 +7,7 @@ const https = require('https');
 const token = process.env.BOT_TOKEN;
 const logChannel = '798668220873703474';
 const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
+const prefix = '.';
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
@@ -432,7 +433,7 @@ client.on('message', async (message) => {
     return;
   }
 
-  if (!message.content.toLowerCase().startsWith('!loadorder')) {
+  if (!message.content.toLowerCase().startsWith(prefix + 'loadorder')) {
     return;
   }
 
@@ -450,7 +451,7 @@ client.on('message', async (message) => {
       }
 
       if (message.attachments.size !== 1) {
-        message.channel.send('You must attach your loadorder file in the same message as `!loadorder`\n' +
+        message.channel.send('You must attach your loadorder file in the same message as `' + prefix + 'loadorder`\n' +
           'The file is located at `' + guildSettings.path + '`');
         return;
       }
@@ -502,11 +503,11 @@ client.on('message', async (message) => {
       return;
     }
     if (args.length === 1) {
-      message.channel.send('Subcommands of `!loadorder channel`:\n' +
-        '`!loadorder channel add` - Adds this channel to list of approved channels\n' +
-        '`!loadorder channel remove` - Removes this channel from list of approved channels\n' +
-        '`!loadorder channel status` - Says if channel is currently approved or not\n' +
-        '`!loadorder channel list` - Lists approved channels');
+      message.channel.send('Subcommands of `' + prefix + 'loadorder channel`:\n' +
+        '`' + prefix + 'loadorder channel add` - Adds this channel to list of approved channels\n' +
+        '`' + prefix + 'loadorder channel remove` - Removes this channel from list of approved channels\n' +
+        '`' + prefix + 'loadorder channel status` - Says if channel is currently approved or not\n' +
+        '`' + prefix + 'loadorder channel list` - Lists approved channels');
       return;
     }
 
@@ -548,11 +549,11 @@ client.on('message', async (message) => {
       });
       message.channel.send(response);
     } else {
-      message.channel.send('Subcommands of `!loadorder channel`:\n' +
-        '`!loadorder channel add` - Adds this channel to list of approved channels\n' +
-        '`!loadorder channel remove` - Removes this channel from list of approved channels\n' +
-        '`!loadorder channel status` - Says if channel is currently approved or not\n' +
-        '`!loadorder channel list` - Lists approved channels');
+      message.channel.send('Subcommands of `' + prefix + 'loadorder channel`:\n' +
+        '`' + prefix + 'loadorder channel add` - Adds this channel to list of approved channels\n' +
+        '`' + prefix + 'loadorder channel remove` - Removes this channel from list of approved channels\n' +
+        '`' + prefix + 'loadorder channel status` - Says if channel is currently approved or not\n' +
+        '`' + prefix + 'loadorder channel list` - Lists approved channels');
     }
   } else if (args[0] === 'staff') {
     if (!isStaff(message.guild, message.author.id)) {
@@ -560,10 +561,10 @@ client.on('message', async (message) => {
     }
 
     if (args.length === 1) {
-      message.channel.send('Subcommands of `!loadorder staff`:\n' +
-        '`!loadorder staff add <user>` - Sets the given user as staff for the server\n' +
-        '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
-        '`!loadorder staff list` - Lists the staff in the server');
+      message.channel.send('Subcommands of `' + prefix + 'loadorder staff`:\n' +
+        '`' + prefix + 'loadorder staff add <user>` - Sets the given user as staff for the server\n' +
+        '`' + prefix + 'loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
+        '`' + prefix + 'loadorder staff list` - Lists the staff in the server');
       return;
     }
 
@@ -628,10 +629,10 @@ client.on('message', async (message) => {
       });
       message.channel.send(response);
     } else {
-      message.channel.send('Subcommands of `!loadorder staff`:\n' +
-        '`!loadorder staff add <user>` - Sets the given user as staff for the server\n' +
-        '`!loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
-        '`!loadorder staff list` - Lists the staff in the server');
+      message.channel.send('Subcommands of `' + prefix + 'loadorder staff`:\n' +
+        '`' + prefix + 'loadorder staff add <user>` - Sets the given user as staff for the server\n' +
+        '`' + prefix + 'loadorder staff remove <user>` - Removes staff from the given user for the server\n' +
+        '`' + prefix + 'loadorder staff list` - Lists the staff in the server');
     }
   } else if (args[0] === 'file') {
     if (!isStaff(message.guild, message.author.id)) {
@@ -639,10 +640,10 @@ client.on('message', async (message) => {
     }
 
     if (args.length === 1) {
-      message.channel.send('Subcommands of `!loadorder file`:\n' +
-        '`!loadorder file update [file]` - Updates the specified file\n' +
-        '`!loadorder file archive [file]` - Archives the current specified file (rarely used)\n' +
-        '`!loadorder file retrieve [file]` - Retrieves and sends the specified file in a discord message attachment\n\n' +
+      message.channel.send('Subcommands of `' + prefix + 'loadorder file`:\n' +
+        '`' + prefix + 'loadorder file update [file]` - Updates the specified file\n' +
+        '`' + prefix + 'loadorder file archive [file]` - Archives the current specified file (rarely used)\n' +
+        '`' + prefix + 'loadorder file retrieve [file]` - Retrieves and sends the specified file in a discord message attachment\n\n' +
         'Possible files:\n' +
         fileTypes.toString());
       return;
@@ -713,10 +714,10 @@ client.on('message', async (message) => {
     }
 
     if (args.length === 1) {
-      message.channel.send('Subcommands of `!loadorder settings`:\n' +
-        '`!loadorder settings pause` - Pauses validation\n' +
-        '`!loadorder settings resume` - Resumes validation\n' +
-        '`!loadorder settings path [path]` - Sets the loadorder file path for users');
+      message.channel.send('Subcommands of `' + prefix + 'loadorder settings`:\n' +
+        '`' + prefix + 'loadorder settings pause` - Pauses validation\n' +
+        '`' + prefix + 'loadorder settings resume` - Resumes validation\n' +
+        '`' + prefix + 'loadorder settings path [path]` - Sets the loadorder file path for users');
       return;
     }
 
@@ -742,7 +743,7 @@ client.on('message', async (message) => {
       });
     } else if (args[1] === 'path') {
       if (args.length === 2) {
-        message.channel.send('Usage: `!loadorder settings path [path]`');
+        message.channel.send('Usage: `' + prefix + 'loadorder settings path [path]`');
         return;
       }
 
@@ -760,10 +761,10 @@ client.on('message', async (message) => {
   } else if (args[0] === 'staffhelp') {
     if (isStaff(message.guild, message.author.id)) {
       message.channel.send('Commands available to staff members:\n' +
-        '`!loadorder staff` - Change who is staff\n' +
-        '`!loadorder channel` - Modify what channels the bot can be used in\n' +
-        '`!loadorder file` - Update, archive, and retrieve various files used by the bot\n' +
-        '`!loadorder settings` - Change bot settings\n' +
+        '`' + prefix + 'loadorder staff` - Change who is staff\n' +
+        '`' + prefix + 'loadorder channel` - Modify what channels the bot can be used in\n' +
+        '`' + prefix + 'loadorder file` - Update, archive, and retrieve various files used by the bot\n' +
+        '`' + prefix + 'loadorder settings` - Change bot settings\n' +
         'All staff commands can be used in any channel');
     }
   } else {
@@ -771,7 +772,7 @@ client.on('message', async (message) => {
       let path = settings.get(message.guild.id).path;
       message.channel.send('This bot will validate your loadorder for you\n' +
         'It does this by comparing your load order against a master list\n' +
-        'To use it, type `!loadorder` and upload your load order (in the same message)\n' +
+        'To use it, type `' + prefix + 'loadorder` and upload your load order (in the same message)\n' +
         'Your load order can be found at `' + path + '`\n' +
         'I will respond with a text file containing what you need to change\n' +
         'Some files may have explanations listed as to why you shouldn\'t have them');
