@@ -70,12 +70,39 @@ loadorder.txt file. To do this, run `!loadorder settings path [c:\your\path]`
 
 ## Necessary setup for development testing
 
-Create a file called `.env` in the same directory as `pelagius.js` and add the
-following line to it, replacing `{your token}` with the token found in the bot
-section of [your application](https://discord.com/developers/applications/):
+First off, run `npm install` from the bot directory to install development
+dependencies.
 
-```env
-BOT_TOKEN="{your token}"
+Testing can be done in a variety of ways, depending on your personal preference.
+The easiest way is to simply edit the included `.pelagiusrc.yaml` file and fill
+in the necessary information. However, this is obviously not ideal as subsequent
+git pulls will result in overwriting. A far more reliable option is to copy the
+provided file to your home directory and edit it there:
+
+```bash
+cp .pelagiusrc.yaml ~/.pelagiusrc.yaml
 ```
 
-Run `npm install` from the bot directory to install development dependencies.
+You can also set the parameters at runtime through both command arguments and
+environment variables. The current configuration options are defined as follows:
+
+### `bot.prefix`
+
+The `bot.prefix` setting sets the prefix for use with the bot, and defaults to
+`!`. It can also be set using the `PELAGIUS__BOT__PREFIX` environment variable
+or the `--bot--prefix` command-line argument.
+
+### `bot.token`
+
+The `bot.token` setting sets the Discord application bot token for the bot. It
+can be found in the "Bot" section for [your application](https://discord.com/developers/applications/),
+and can be set using the `PELAGIUS__BOT__TOKEN` environment variable or the
+`--bot-token` command-line argument.
+
+### `bot.log_channel`
+
+The `bot.log_channel` setting sets the channel to use for bot event logging. It
+should be the channel ID, not the name, and the bot must have permission to post
+in the specified channel. It can also be set using the `PELAGIUS__BOT__LOG_CHANNEL`
+environment variable or the `--bot--log_channel` command-line argument. Note
+that this channel _should not_ be publicly accessible.
