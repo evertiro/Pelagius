@@ -7,7 +7,7 @@ const https = require('https');
 const token = process.env.BOT_TOKEN;
 const logChannel = '798668220873703474';
 const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
-const prefix = '.';
+const prefix = '!';
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
