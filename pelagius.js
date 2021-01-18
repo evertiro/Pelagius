@@ -1,13 +1,20 @@
-require('dotenv').config();
+var milieu = require('milieu');
+var config = milieu('pelagius', {
+  bot: {
+    prefix: '!'
+  }
+});
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
+
 const fs = require('fs');
 const https = require('https');
 
-const token = process.env.BOT_TOKEN;
-const logChannel = '798668220873703474';
+const token = config.bot.token;
+const logChannel = config.bot.log_channel;
 const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
-const prefix = '!';
+const prefix = config.bot.prefix;
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
