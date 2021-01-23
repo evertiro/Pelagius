@@ -698,7 +698,7 @@ client.on('message', async (message) => {
             archiveIfNeeded(message.guild, args[2]).then(() => {
                 message.channel.send('The ' + args[2] + ' file has been successfully archived.');
                 logMessage('The ' + args[2] + ' file has been archived in ' + getGuildStr(message.guild));
-            })
+            });
         } else if (args[1] === 'retrieve') {
             fs.readFile('./data/' + message.guild.id + '/' + getFileNameFromFileType(args[2]), (err, data) => {
                 if (err) {
