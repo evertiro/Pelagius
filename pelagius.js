@@ -403,7 +403,7 @@ async function prepCompare(guild, content) {
     }
 
     try {
-        let reasons = await fs.promises.readFile('./data/' + guild.id + '/reasons.json', 'uft8');
+        let reasons = await fs.promises.readFile('./data/' + guild.id + '/reasons.json', 'utf8');
         reasonJSON = JSON.parse(reasons.toLowerCase());
     } catch (e) {
         reasonJSON = JSON.parse('{}');
