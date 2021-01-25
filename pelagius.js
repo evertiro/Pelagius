@@ -198,7 +198,13 @@ async function createDirectory(path) {
 function setup() {
     client.guilds.cache.forEach((guild) => {
         createDirectory('./data/' + guild.id).then(() => {
-            loadChannels(guild).catch((err) => {
+            loadChannels(guild).then(() => {
+                let guildChannels = approvedChannels.get(guild.id);
+                if (guildChannels.length === 1 && guildChannels[0] === '') {
+                    guildChannels.pop();
+                }
+                approvedChannels.set(guild.id, guildChannels);
+            }).catch((err) => {
                 logMessage('Error: Failed to load channels for ' + getGuildStr(guild) + '\n' + err);
                 console.log(err);
             });
@@ -540,15 +546,22 @@ client.on('message', async (message) => {
         } else if (args[1] === 'status') {
             message.channel.send('<#' + message.channel.id + '> is' + (isApprovedChannel(message.guild, message.channel.id) ? '' : ' not') + ' an approved channel');
         } else if (args[1] === 'list') {
+            let guildChannels = approvedChannels.get(message.guild.id);
+
+            if (guildChannels.length === 0) {
+                message.channel.send('There are no approved channels');
+                return;
+            }
+
             let response = 'List of approved channels:\n';
-            // Loop through approvedChannels, adding each one that's in the same guild as the sent command to the output
-            approvedChannels.forEach((channels, guild) => {
-                if (guild === message.guild.id) {
-                    channels.forEach((channelID) => {
-                        response += '<#' + channelID + '>\n';
-                    });
+
+            approvedChannels.get(message.guild.id).forEach((id) => {
+                if (id === '') {
+                    return;
                 }
+                response += '<#' + id + '>\n';
             });
+
             message.channel.send(response);
         } else {
             message.channel.send('Subcommands of `' + prefix + 'loadorder channel`:\n' +
@@ -617,18 +630,12 @@ client.on('message', async (message) => {
 
         } else if (args[1] === 'list') {
             let response = 'List of staff members:\n';
-            // Loop through staffUsers, adding each one that's in the same guild as the sent command to the output
-            staffUsers.forEach((users, guild) => {
-                if (guild === message.guild.id) {
-                    // guilds are keys, users are values (in an array)
-                    // get the proper guild, then loop through the users in the array
-                    users.forEach((userID) => {
-                        // Convert from developer ID to username and tag (i.e. Robotic#1111)
-                        let userObj = client.users.cache.get(userID);
-                        response += userObj.username + '#' + userObj.discriminator + ' (' + userID + ')\n';
-                    });
-                }
+
+            staffUsers.get(message.guild.id).forEach((id) => {
+                let userObj = client.users.cache.get(id);
+                response += userObj.username + '#' + userObj.discriminator + ' (' + id + ')\n';
             });
+
             message.channel.send(response);
         } else {
             message.channel.send('Subcommands of `' + prefix + 'loadorder staff`:\n' +
