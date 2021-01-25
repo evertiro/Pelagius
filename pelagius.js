@@ -247,6 +247,7 @@ async function updateFile(guild, fileType, url) {
             response.on('error', (err) => {
                 reject(err);
             });
+            response.pipe(file);
 
             if (fileType === 'reasons') {
                 let content = '';
@@ -257,14 +258,13 @@ async function updateFile(guild, fileType, url) {
                 response.on('end', () => {
                     try {
                         let json = JSON.parse(content);
-                        response.pipe(file);
                         resolve();
                     } catch (e) {
                         reject(e);
                     }
                 });
             } else {
-                response.pipe(file);
+
                 resolve();
             }
         });
