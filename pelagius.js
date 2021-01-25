@@ -24,8 +24,8 @@ var settings = new Map();
 
 class Settings {
     constructor(enabled, path) {
-        this.enabled = (enabled === 'true');
-        this.path = path;
+        this._enabled = (enabled === 'true');
+        this._path = path;
     }
 
     toString() {
