@@ -731,7 +731,7 @@ client.on('message', async (message) => {
         }
 
         if (args[1] === 'pause') {
-            settings.get(message.guild.id).enabled = false;
+            settings.get(message.guild.id).enabled = 'false';
             saveSettings(message.guild).then(() => {
                 message.channel.send('Paused loadorder validation');
                 logMessage('Loadorder validation was paused in ' + getGuildStr(message.guild));
@@ -741,7 +741,7 @@ client.on('message', async (message) => {
                 console.log(err);
             });
         } else if (args[1] === 'resume') {
-            settings.get(message.guild.id).enabled = true;
+            settings.get(message.guild.id).enabled = 'true';
             saveSettings(message.guild).then(() => {
                 message.channel.send('Resumed loadorder validation');
                 logMessage('Loadorder validation was resumed in ' + getGuildStr(message.guild));
