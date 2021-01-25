@@ -1,3 +1,5 @@
+"use strict";
+
 var milieu = require('milieu');
 var config = milieu('pelagius', {
     bot: {
@@ -21,32 +23,29 @@ var approvedChannels = new Map();
 var settings = new Map();
 
 class Settings {
-    enabled;
-    path;
-
     constructor(enabled, path) {
         this.enabled = (enabled === 'true');
         this.path = path;
     }
 
     toString() {
-        return this.enabled + '\n' + this.path;
+        return this._enabled + '\n' + this._path;
     }
 
     get enabled() {
-        return this.enabled;
+        return this._enabled;
     }
 
     set enabled(bool) {
-        this.enabled = (bool === 'true');
+        this._enabled = (bool === 'true');
     }
 
     get path() {
-        return this.path;
+        return this._path;
     }
 
     set path(str) {
-        this.path = str;
+        this._path = str;
     }
 }
 
