@@ -181,7 +181,7 @@ async function loadSettings(guild) {
         settings.set(guild.id, new Settings(lines[0], lines[1]));
         logMessage('Loaded settings for ' + getGuildStr(guild) + ' to memory');
     }).catch(() => {
-        settings.set(guild.id, new Settings(true, 'MO2/profiles/[profile]/loadorder.txt'));
+        settings.set(guild.id, new Settings('true', 'MO2/profiles/[profile]/loadorder.txt'));
         saveSettings(guild).then(() => {
             logMessage('Created new settings for ' + getGuildStr(guild));
         }).catch((err) => {
@@ -269,7 +269,6 @@ async function updateFile(guild, fileType, url) {
                     }
                 });
             } else {
-
                 resolve();
             }
         });
@@ -678,7 +677,7 @@ client.on('message', async (message) => {
                 logMessage('The ' + args[2] + ' file has been updated in ' + getGuildStr(message.guild));
 
                 if (args[2] === 'loadorder') {
-                    settings.get(message.guild.id).enabled = true;
+                    settings.get(message.guild.id).enabled = 'true';
                     saveSettings(message.guild).then(() => {
                         message.channel.send('Resumed loadorder validation');
                         logMessage('Loadorder validation was resumed in ' + getGuildStr(message.guild));
