@@ -484,7 +484,7 @@ client.on('message', async (message) => {
                 response.on('end', () => {
                     prepCompare(message.guild, content).then((diffs) => {
                         if (diffs === '') {
-                            message.channel.send(message.author.toString() + ', your loadorder matches the master list, no problems there!');
+                            message.channel.send(message.author.toString() + ', your loadorder has the same plugins as the master list, no problems there!');
                             return;
                         }
                         let buf = Buffer.from(diffs, 'utf8');
