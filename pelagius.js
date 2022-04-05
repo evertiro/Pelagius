@@ -1,12 +1,13 @@
 "use strict";
 
-const { 
+const {
     discordToken, logChannel, prefix
 } = require('./config.json');
 
 const {
     Client,
-    Intents
+    Intents,
+    MessageAttachment
 } = require('discord.js');
 
 const client = new Client({
@@ -488,8 +489,11 @@ client.on('messageCreate', async (message) => {
                             return;
                         }
                         let buf = Buffer.from(diffs, 'utf8');
-                        let attachment = new Discord.MessageAttachment(buf, 'differences.txt');
-                        message.channel.send(message.author.toString() + ', here\'s what you need to fix:', attachment);
+                        let attachment = new MessageAttachment(buf, 'differences.txt');
+                        message.channel.send({
+                            files: [ attachment ],
+                            content: message.author.toString() + ', here\'s what you need to fix:'
+                        });
                     }).catch((err) => {
                         message.channel.send('There was an error comparing your loadorder, contact Robotic');
                         logMessage('Error: Failed to compare loadorder in ' + getChannelStr(message.channel) + '\nURL: ' + url + '\n' + err);
@@ -711,8 +715,11 @@ client.on('messageCreate', async (message) => {
                     logMessage('Error: Failed to read ' + args[2] + ' file in ' + getGuildStr(message.guild) + '\n' + err);
                     console.log(err);
                 } else {
-                    let attachment = new Discord.MessageAttachment(data, getFileNameFromFileType(args[2]));
-                    message.channel.send('Here is the current ' + args[2] + ' file', attachment);
+                    let attachment = new MessageAttachment(data, getFileNameFromFileType(args[2]));
+                    message.channel.send({
+                        files: [ attachment ],
+                        content: 'Here is the current ' + args[2] + ' file'
+                    });
                 }
             });
         }
