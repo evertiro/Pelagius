@@ -2,6 +2,7 @@
   "dependencies": {
     "discord.js": "^13.3.1",
     "fs": "^0.0.1-security",
+    "grunt": "^1.4.1",
     "https": "^1.0.0"
   }
 }
