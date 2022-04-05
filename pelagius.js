@@ -1,22 +1,22 @@
 "use strict";
 
-var milieu = require('milieu');
-var config = milieu('pelagius', {
-    bot: {
-        prefix: '!'
-    }
-});
+const { 
+    discordToken, logChannel, prefix
+} = require('./config.json');
 
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const {
+    Client,
+    Intents
+} = require('discord.js');
+
+const client = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+});
 
 const fs = require('fs');
 const https = require('https');
 
-const token = config.bot.token;
-const logChannel = config.bot.log_channel;
 const fileTypes = ['loadorder', 'skips', 'reasons', 'loot'];
-const prefix = config.bot.prefix;
 
 var staffUsers = new Map();
 var approvedChannels = new Map();
@@ -434,7 +434,7 @@ client.on('guildCreate', (guild) => {
     });
 });
 
-client.on('message', async (message) => {
+client.on('messageCreate', async (message) => {
     // Disallow DMs to bot
     if (message.guild === null) {
         return;
@@ -788,4 +788,4 @@ client.on('message', async (message) => {
     }
 });
 
-client.login(token);
+client.login(discordToken);

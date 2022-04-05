@@ -324,3 +324,4 @@ $RECYCLE.BIN/
 # The following is added manually to ensure user configs for the bot are not
 # included in the repository accidentally
 data/
+config.json
