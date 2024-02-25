@@ -7,7 +7,7 @@ class Logger {
 		if (message.length === 0) {
 			message = 'An empty log message was sent.';
 		}
-		const result = message.match(/.{1,2000}/g) || [];
+		const result = message.match(/.{1,2000}/s) || [];
 
 		result.forEach((newMessage) => {
 			this._channel.send(newMessage);

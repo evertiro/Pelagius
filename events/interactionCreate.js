@@ -21,8 +21,8 @@ module.exports = {
 			const logChannel = await interaction.client.channels.fetch(logChannelId);
 			const logger = new Logger(logChannel);
 			logger.logMessage('A command encountered an error!');
-			logger.logMessage(`Interaction: \n\`\`\`${interaction.toString()}\`\`\``);
-			logger.logMessage(`Error: \n\`\`\`${error}\`\`\``);
+			logger.logMessage(`Interaction: \n\`\`\`\n${interaction.toString()}\n\`\`\``);
+			logger.logMessage(`Error: \n\`\`\`\n${error}\n\`\`\``);
 			if (interaction.replied || interaction.deferred) {
 				await interaction.followUp({
 					content: 'There was an error while executing this command!',
