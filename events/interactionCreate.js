@@ -1,4 +1,6 @@
 const { Events } = require('discord.js');
+const { Logger } = require('../util/Logger.js');
+const { logChannelId } = require('../config.json');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -16,6 +18,11 @@ module.exports = {
 			await command.execute(interaction);
 		} catch (error) {
 			console.error(error);
+			const logChannel = await interaction.client.channels.fetch(logChannelId);
+			const logger = new Logger(logChannel);
+			logger.logMessage('A command encountered an error!');
+			logger.logMessage(`Interaction: \n\`\`\`${interaction.toString()}\`\`\``);
+			logger.logMessage(`Error: \n\`\`\`${error}\`\`\``);
 			if (interaction.replied || interaction.deferred) {
 				await interaction.followUp({
 					content: 'There was an error while executing this command!',
