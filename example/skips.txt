@@ -1,3 +1,0 @@
-DynDOLOD.esm
-FNIS.esp
-Occlusion.esp
