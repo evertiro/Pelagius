@@ -1,5 +1,3 @@
-const fsPromises = require('node:fs/promises');
-const path = require('node:path');
 const { Events } = require('discord.js');
 const { Logger } = require('../util/Logger.js');
 const { FileManager } = require('../util/FileManager.js');
