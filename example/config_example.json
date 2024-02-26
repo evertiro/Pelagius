@@ -1,5 +1,6 @@
 {
-    "discordToken" : "yourtokenhere",
-    "logChannel" : "logchannelhere",
-    "prefix" : "!"
+	"token": "[your token]",
+	"clientId": "[bot ID]",
+	"guildId": "[guild ID (for guild-level command deployments)]",
+	"logChannelId": "[log channel]"
 }
