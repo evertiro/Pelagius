@@ -127,6 +127,7 @@ module.exports = {
 				)
 		),
 	async execute(interaction) {
+		await interaction.deferReply({ ephemeral: true });
 		const guild = interaction.guild;
 		const guildManager = new GuildManager(guild);
 		await guildManager.init();
@@ -141,78 +142,68 @@ module.exports = {
 			const guideOption = interaction.options.getString('guide');
 			if (subcommand === 'add') {
 				if (guides.includes(guideOption)) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is already in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is already in the list of guides`
 					});
 					return;
 				}
 
 				await guildManager.addGuide(guideOption);
-				await interaction.reply({
-					content: `\`${guideOption}\` has been added to the list of guides`,
-					ephemeral: true
+				await interaction.editReply({
+					content: `\`${guideOption}\` has been added to the list of guides`
 				});
 			} else if (subcommand === 'remove') {
 				if (!guides.includes(guideOption)) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is not in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is not in the list of guides`
 					});
 					return;
 				}
 
 				if (defaultGuide === guideOption) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is the default guide, it cannot be removed`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is the default guide, it cannot be removed`
 					});
 					return;
 				}
 
 				await guildManager.removeGuide(guideOption);
-				await interaction.reply({
-					content: `\`${guideOption}\` has been removed from the list of guides`,
-					ephemeral: true
+				await interaction.editReply({
+					content: `\`${guideOption}\` has been removed from the list of guides`
 				});
 			} else if (subcommand === 'default') {
 				if (!guides.includes(guideOption)) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is not in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is not in the list of guides`
 					});
 					return;
 				}
 
 				if (defaultGuide === guideOption) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is already the default guide`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is already the default guide`
 					});
 					return;
 				}
 
 				await guildManager.setDefaultGuide(guideOption);
-				await interaction.reply({
-					content: `\`${guideOption}\` has been set as the default guide`,
-					ephemeral: true
+				await interaction.editReply({
+					content: `\`${guideOption}\` has been set as the default guide`
 				});
 			} else if (subcommand === 'rename') {
 				const oldName = interaction.options.getString('oldname');
 				const newName = interaction.options.getString('newname');
 
 				if (!guides.includes(oldName)) {
-					await interaction.reply({
-						content: `\`${oldName}\` is not in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${oldName}\` is not in the list of guides`
 					});
 					return;
 				}
 
 				if (guides.includes(newName)) {
-					await interaction.reply({
-						content: `\`${newName}\` is already in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${newName}\` is already in the list of guides`
 					});
 					return;
 				}
@@ -221,38 +212,32 @@ module.exports = {
 				if (defaultGuide === oldName) {
 					await guildManager.setDefaultGuide(newName);
 				}
-				await interaction.reply({
-					content: `\`${oldName}\` has been renamed to \`${newName}\``,
-					ephemeral: true
+				await interaction.editReply({
+					content: `\`${oldName}\` has been renamed to \`${newName}\``
 				});
 			} else if (subcommand === 'enabled') {
 				const enabledOption = interaction.options.getBoolean('enabled');
 
 				if (!guides.includes(guideOption)) {
-					await interaction.reply({
-						content: `\`${guideOption}\` is not in the list of guides`,
-						ephemeral: true
+					await interaction.editReply({
+						content: `\`${guideOption}\` is not in the list of guides`
 					});
 					return;
 				}
 
 				const guideEnabled = guildManager.getEnabled(guideOption);
 				if (guideEnabled === enabledOption) {
-					await interaction.reply({
+					await interaction.editReply({
 						content: `Validation for \`${guideOption}\` is already ${
 							enabledOption ? 'en' : 'dis'
-						}abled`,
-						ephemeral: true
+						}abled`
 					});
 					return;
 				}
 
 				await guildManager.setEnabled(guideOption, enabledOption);
-				await interaction.reply({
-					content: `Validation for \`${guideOption}\` has been ${
-						enabledOption ? 'en' : 'dis'
-					}abled`,
-					ephemeral: true
+				await interaction.editReply({
+					content: `Validation for \`${guideOption}\` has been ${enabledOption ? 'en' : 'dis'}abled`
 				});
 			} else if (subcommand === 'list') {
 				const guideList = guides.map(
@@ -262,9 +247,8 @@ module.exports = {
 					'\n'
 				)}\n\`\`\`\nDefault guide: \`${defaultGuide}\``;
 
-				await interaction.reply({
-					content: guideResponse,
-					ephemeral: true
+				await interaction.editReply({
+					content: guideResponse
 				});
 			}
 		} else if (subcommandGroup === 'file') {
@@ -275,9 +259,8 @@ module.exports = {
 			const enabled = guildManager.getEnabled(guide);
 
 			if (!guides.includes(guide)) {
-				await interaction.reply({
-					content: `The guide \`${guide}\` does not exist in this server`,
-					ephemeral: true
+				await interaction.editReply({
+					content: `The guide \`${guide}\` does not exist in this server`
 				});
 				return;
 			}
@@ -299,13 +282,13 @@ module.exports = {
 					try {
 						JSON.parse(fileContents);
 					} catch {
-						await interaction.reply({ content: 'Invalid JSON provided', ephemeral: true });
+						await interaction.editReply({ content: 'Invalid JSON provided' });
 						return;
 					}
 				}
 
 				await guildManager.setFile(guide, fileContents, fileName);
-				await interaction.reply({ content: `The ${type} file has been updated`, ephemeral: true });
+				await interaction.editReply({ content: `The ${type} file has been updated` });
 			} else if (subcommand === 'retrieve') {
 				let attachment;
 				if (type === 'loadorder') {
@@ -322,10 +305,9 @@ module.exports = {
 					attachment = new AttachmentBuilder(buf, { name: 'skips.txt' });
 				}
 
-				await interaction.reply({
+				await interaction.editReply({
 					content: `Here is the current ${type} file for \`${guide}\``,
-					files: [attachment],
-					ephemeral: true
+					files: [attachment]
 				});
 			}
 		}

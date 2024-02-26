@@ -7,6 +7,7 @@ module.exports = {
 		.setDescription('List available loadorder guides')
 		.setDMPermission(false),
 	async execute(interaction) {
+		await interaction.deferReply({ ephemeral: true });
 		const guild = interaction.guild;
 		const guildManager = new GuildManager(guild);
 		await guildManager.init();
@@ -16,6 +17,6 @@ module.exports = {
 		const guideResponse = `Available guides: \n\`\`\`\n${guides.join(
 			'\n'
 		)}\n\`\`\`\nDefault guide: \`${defaultGuide}\``;
-		await interaction.reply({ content: guideResponse, ephemeral: true });
+		await interaction.editReply({ content: guideResponse });
 	}
 };
