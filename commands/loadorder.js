@@ -27,7 +27,6 @@ module.exports = {
 
 		const guides = guildManager.getGuides();
 		const defaultGuide = guildManager.getDefaultGuide();
-		const channels = guildManager.getChannels();
 
 		const guide = interaction.options.getString('guide') ?? defaultGuide;
 		const enabled = guildManager.getEnabled(guide);
@@ -44,14 +43,6 @@ module.exports = {
 		if (masterLoadorder === null) {
 			await interaction.reply({
 				content: `The loadorder file for \`${guide}\` has not been set`,
-				ephemeral: true
-			});
-			return;
-		}
-
-		if (!channels.includes(interaction.channelId)) {
-			await interaction.reply({
-				content: `This channel is not enabled for loadorder validation`,
 				ephemeral: true
 			});
 			return;

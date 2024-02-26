@@ -50,20 +50,6 @@ class GuildManager {
 		await this._fileManager.renameGuideFolder(this._guild.id, oldName, newName);
 	}
 
-	getChannels() {
-		return this._settings.channels;
-	}
-
-	async addChannel(channel) {
-		this._settings.channels.push(channel);
-		await this.persist();
-	}
-
-	async removeChannel(channel) {
-		this._settings.channels.splice(this._settings.channels.indexOf(channel), 1);
-		await this.persist();
-	}
-
 	getEnabled(guide) {
 		return this._settings.guides[guide].enabled;
 	}

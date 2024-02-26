@@ -131,8 +131,7 @@ function getDefaultSettings() {
 				enabled: true
 			}
 		},
-		defaultGuide: 'default',
-		channels: []
+		defaultGuide: 'default'
 	};
 
 	return settings;

@@ -13,38 +13,6 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.addSubcommandGroup((group) =>
 			group
-				.setName('channel')
-				.setDescription('Manage approved channels')
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName('add')
-						.setDescription('Adds a channel to the list of approved channels')
-						.addChannelOption((option) =>
-							option.setName('channel').setDescription('The channel to add').setRequired(true)
-						)
-				)
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName('remove')
-						.setDescription('Removes a channel from the list of approved channels')
-						.addChannelOption((option) =>
-							option.setName('channel').setDescription('The channel to remove').setRequired(true)
-						)
-				)
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName('check')
-						.setDescription('Checks if a channel is in the list of approved channels')
-						.addChannelOption((option) =>
-							option.setName('channel').setDescription('The channel to check').setRequired(true)
-						)
-				)
-				.addSubcommand((subcommand) =>
-					subcommand.setName('list').setDescription('Lists the approved channels')
-				)
-		)
-		.addSubcommandGroup((group) =>
-			group
 				.setName('guide')
 				.setDescription('Manage list of guides')
 				.addSubcommand((subcommand) =>
@@ -169,51 +137,7 @@ module.exports = {
 		const subcommandGroup = interaction.options.getSubcommandGroup();
 		const subcommand = interaction.options.getSubcommand();
 
-		if (subcommandGroup === 'channel') {
-			const channelOption = interaction.options.getChannel('channel');
-			const channels = guildManager.getChannels();
-			if (subcommand === 'add') {
-				if (channels.includes(channelOption.id)) {
-					await interaction.reply({
-						content: `<#${channelOption.id}> is already an approved channel`,
-						ephemeral: true
-					});
-					return;
-				}
-
-				await guildManager.addChannel(channelOption.id);
-				await interaction.reply({
-					content: `<#${channelOption.id}> has been added as an approved channel`,
-					ephemeral: true
-				});
-			} else if (subcommand === 'remove') {
-				if (!channels.includes(channelOption.id)) {
-					await interaction.reply({
-						content: `<#${channelOption.id}> is not approved channel`,
-						ephemeral: true
-					});
-					return;
-				}
-
-				await guildManager.removeChannel(channelOption.id);
-				await interaction.reply({
-					content: `<#${channelOption.id}> has been removed from the approved channels`,
-					ephemeral: true
-				});
-			} else if (subcommand === 'check') {
-				const approved = channels.includes(channelOption.id);
-				await interaction.reply({
-					content: `<#${channelOption.id}> is${approved ? '' : ' not'} an approved channel`,
-					ephemeral: true
-				});
-			} else if (subcommand === 'list') {
-				const channelString = channels.map((channel) => `<#${channel}>`).join(', ');
-				await interaction.reply({
-					content: `Here are the approved channels: ${channelString}`,
-					ephemeral: true
-				});
-			}
-		} else if (subcommandGroup === 'guide') {
+		if (subcommandGroup === 'guide') {
 			const guideOption = interaction.options.getString('guide');
 			if (subcommand === 'add') {
 				if (guides.includes(guideOption)) {
@@ -382,14 +306,6 @@ module.exports = {
 
 				await guildManager.setFile(guide, fileContents, fileName);
 				await interaction.reply({ content: `The ${type} file has been updated`, ephemeral: true });
-
-				if (type === 'loadorder' && !enabled) {
-					await guildManager.setEnabled(guide, true);
-					await interaction.followUp({
-						content: `Loadorder validation has been resumed for \`${guide}\``,
-						ephemeral: true
-					});
-				}
 			} else if (subcommand === 'retrieve') {
 				let attachment;
 				if (type === 'loadorder') {
@@ -411,9 +327,6 @@ module.exports = {
 					files: [attachment],
 					ephemeral: true
 				});
-			}
-		} else {
-			if (subcommand === 'enabled') {
 			}
 		}
 	}
