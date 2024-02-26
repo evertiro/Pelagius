@@ -90,7 +90,7 @@ class FileManager {
 		try {
 			return await fsPromises.readFile(loadorderFile, { encoding: 'utf8' });
 		} catch {
-			return null;
+			return '';
 		}
 	}
 
