@@ -92,6 +92,23 @@ module.exports = {
 						)
 				)
 				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('enabled')
+						.setDescription('Sets if validation is enabled or not')
+						.addBooleanOption((option) =>
+							option
+								.setName('enabled')
+								.setDescription('Whether to enable or disable')
+								.setRequired(true)
+						)
+						.addStringOption((option) =>
+							option
+								.setName('guide')
+								.setDescription('The guide to set enabled or not')
+								.setRequired(true)
+						)
+				)
+				.addSubcommand((subcommand) =>
 					subcommand.setName('list').setDescription('Lists the guides')
 				)
 		)
@@ -284,6 +301,35 @@ module.exports = {
 					content: `\`${oldName}\` has been renamed to \`${newName}\``,
 					ephemeral: true
 				});
+			} else if (subcommand === 'enabled') {
+				const enabledOption = interaction.options.getBoolean('enabled');
+
+				if (!guides.includes(guideOption)) {
+					await interaction.reply({
+						content: `\`${guideOption}\` is not in the list of guides`,
+						ephemeral: true
+					});
+					return;
+				}
+
+				const guideEnabled = guildManager.getEnabled(guideOption);
+				if (guideEnabled === enabledOption) {
+					await interaction.reply({
+						content: `Validation for \`${guideOption}\` is already ${
+							enabledOption ? 'en' : 'dis'
+						}abled`,
+						ephemeral: true
+					});
+					return;
+				}
+
+				await guildManager.setEnabled(guideOption, enabledOption);
+				await interaction.reply({
+					content: `Validation for \`${guideOption}\` has been ${
+						enabledOption ? 'en' : 'dis'
+					}abled`,
+					ephemeral: true
+				});
 			} else if (subcommand === 'list') {
 				const guideList = guides.map(
 					(guide) => `${guide} - Enabled: ${guildManager.getEnabled(guide)}`
@@ -301,8 +347,8 @@ module.exports = {
 			const guides = guildManager.getGuides();
 			const defaultGuide = guildManager.getDefaultGuide();
 			const guide = interaction.options.getString('guide') ?? defaultGuide;
-			const enabled = guildManager.getEnabled(guide);
 			const type = interaction.options.getString('filetype');
+			const enabled = guildManager.getEnabled(guide);
 
 			if (!guides.includes(guide)) {
 				await interaction.reply({
@@ -365,6 +411,9 @@ module.exports = {
 					files: [attachment],
 					ephemeral: true
 				});
+			}
+		} else {
+			if (subcommand === 'enabled') {
 			}
 		}
 	}
