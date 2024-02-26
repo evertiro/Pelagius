@@ -56,9 +56,6 @@ module.exports = {
 			return;
 		}
 
-		const reasons = JSON.parse((await guildManager.getReasons(guide)).toLowerCase());
-		const skips = (await guildManager.getSkips(guide)).toLowerCase().split(/\r?\n/);
-
 		const userLoadorderFile = interaction.options.getAttachment('file');
 
 		if (userLoadorderFile.name !== 'loadorder.txt') {
@@ -70,6 +67,10 @@ module.exports = {
 			await interaction.reply({ content: 'The file must be the right filetype', ephemeral: true });
 			return;
 		}
+		await interaction.deferReply();
+
+		const reasons = JSON.parse((await guildManager.getReasons(guide)).toLowerCase());
+		const skips = (await guildManager.getSkips(guide)).toLowerCase().split(/\r?\n/);
 
 		const remoteManager = new RemoteManager(logger);
 		const userLoadorder = (await remoteManager.fetch(userLoadorderFile.url))
@@ -79,11 +80,11 @@ module.exports = {
 		const result = compare(masterLoadorder, userLoadorder, reasons, skips);
 
 		if (result === '') {
-			await interaction.reply('Your loadorder has no issues!');
+			await interaction.editReply('Your loadorder has no issues!');
 		} else {
 			const buf = Buffer.from(result, 'utf8');
 			const attachment = new AttachmentBuilder(buf, { name: 'differences.txt' });
-			await interaction.reply({ content: "Here's what you need to fix", files: [attachment] });
+			await interaction.editReply({ content: "Here's what you need to fix", files: [attachment] });
 		}
 	}
 };
