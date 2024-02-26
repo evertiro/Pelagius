@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { GuildManager } = require('../../util/GuildManager.js');
+const { GuildManager } = require('../util/GuildManager.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -13,10 +13,9 @@ module.exports = {
 
 		const guides = guildManager.getGuides();
 		const defaultGuide = guildManager.getDefaultGuide();
-
-		const guideResponse = `Available guides: \n\`\`\`${guides.join(
+		const guideResponse = `Available guides: \n\`\`\`\n${guides.join(
 			'\n'
-		)}\`\`\`\nDefault guide: \`${defaultGuide}\``;
+		)}\n\`\`\`\nDefault guide: \`${defaultGuide}\``;
 		await interaction.reply({ content: guideResponse, ephemeral: true });
 	}
 };

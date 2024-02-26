@@ -20,6 +20,6 @@ async function startup(client) {
 	const fileManager = new FileManager();
 	await fileManager.createDataFolder();
 	await client.guilds.cache.forEach((guild) => {
-		fileManager.createGuildFiles(guild);
+		fileManager.createGuildFiles(guild.id);
 	});
 }

@@ -13,11 +13,10 @@ class FileManager {
 		}
 	}
 
-	async createGuildFiles(guild) {
-		const id = guild.id;
-		const dataFolder = path.join(__dirname, '..', 'data', id);
+	async createGuildFiles(guildId) {
+		const dataFolder = path.join(__dirname, '..', 'data', guildId);
 		const dataFile = path.join(dataFolder, 'settings.json');
-		const defaultGuideFolder = path.join(__dirname, '..', 'data', id, 'default');
+		const defaultGuideFolder = path.join(__dirname, '..', 'data', guildId, 'default');
 
 		try {
 			await fsPromises.access(dataFolder);
@@ -28,7 +27,7 @@ class FileManager {
 		try {
 			await fsPromises.access(dataFile);
 		} catch {
-			await fsPromises.writeFile(dataFile, JSON.stringify(getDefaultSettings(guild)));
+			await fsPromises.writeFile(dataFile, JSON.stringify(getDefaultSettings()));
 		}
 
 		try {
@@ -38,6 +37,35 @@ class FileManager {
 		}
 	}
 
+	async createGuideFolder(guildId, guideName) {
+		const dataFolder = path.join(__dirname, '..', 'data', guildId);
+		const guideFolder = path.join(__dirname, '..', 'data', guildId, guideName);
+
+		try {
+			await fsPromises.access(dataFolder);
+		} catch {
+			await fsPromises.mkdir(dataFolder);
+		}
+
+		try {
+			await fsPromises.access(guideFolder);
+		} catch {
+			await fsPromises.mkdir(guideFolder);
+		}
+	}
+
+	async deleteGuideFolder(guildId, guideName) {
+		const guideFolder = path.join(__dirname, '..', 'data', guildId, guideName);
+		await fsPromises.rm(guideFolder, { recursive: true, force: true });
+	}
+
+	async renameGuideFolder(guildId, oldName, newName) {
+		const oldGuideFolder = path.join(__dirname, '..', 'data', guildId, oldName);
+		const newGuideFolder = path.join(__dirname, '..', 'data', guildId, newName);
+		await fsPromises.cp(oldGuideFolder, newGuideFolder, { recursive: true, force: true });
+		await this.deleteGuideFolder(guildId, oldName);
+	}
+
 	async getGuildSettings(guildId) {
 		const settingsFile = path.join(__dirname, '..', 'data', guildId, 'settings.json');
 
@@ -45,10 +73,15 @@ class FileManager {
 			const settings = JSON.parse(await fsPromises.readFile(settingsFile));
 			return settings;
 		} catch {
-			const defaultSettings = getDefaultSettings(guild);
+			const defaultSettings = getDefaultSettings();
 			await fsPromises.writeFile(settingsFile, JSON.stringify(defaultSettings));
 			return defaultSettings;
 		}
+	}
+
+	async setGuildSettings(guildId, newSettings) {
+		const settingsFile = path.join(__dirname, '..', 'data', guildId, 'settings.json');
+		await fsPromises.writeFile(settingsFile, JSON.stringify(newSettings));
 	}
 
 	async getLoadorderFile(guildId, guide) {
@@ -92,11 +125,15 @@ module.exports = {
 	FileManager
 };
 
-function getDefaultSettings(guild) {
+function getDefaultSettings() {
 	const settings = {
-		staff: [guild.ownerId],
-		guides: ['default'],
-		defaultGuide: 'default'
+		guides: {
+			default: {
+				enabled: true
+			}
+		},
+		defaultGuide: 'default',
+		channels: []
 	};
 
 	return settings;

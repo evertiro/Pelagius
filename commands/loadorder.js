@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { GuildManager } = require('../../util/GuildManager.js');
-const { Logger } = require('../../util/Logger.js');
-const { logChannelId } = require('../../config.json');
-const https = require('https');
+const { GuildManager } = require('../util/GuildManager.js');
+const { RemoteManager } = require('../util/RemoteManager.js');
+const { Logger } = require('../util/Logger.js');
+const { logChannelId } = require('../config.json');
 const { AttachmentBuilder } = require('discord.js');
 
 module.exports = {
@@ -27,8 +27,10 @@ module.exports = {
 
 		const guides = guildManager.getGuides();
 		const defaultGuide = guildManager.getDefaultGuide();
+		const channels = guildManager.getChannels();
 
 		const guide = interaction.options.getString('guide') ?? defaultGuide;
+		const enabled = guildManager.getEnabled(guide);
 
 		if (!guides.includes(guide)) {
 			await interaction.reply({
@@ -47,11 +49,36 @@ module.exports = {
 			return;
 		}
 
+		if (!channels.includes(interaction.channelId)) {
+			await interaction.reply({
+				content: `This channel is not enabled for loadorder validation`,
+				ephemeral: true
+			});
+			return;
+		}
+
+		if (!enabled) {
+			await interaction.reply({
+				content: `Loadorder validation is disabled for guide \`${guide}\``,
+				ephemeral: true
+			});
+			return;
+		}
+
 		const reasons = await guildManager.getReasons(guide);
 		const skips = await guildManager.getSkips(guide);
 
-		const userLoadorderUrl = interaction.options.getAttachment('file').url;
-		const userLoadorder = (await readRemoteLoadorder(userLoadorderUrl, logger))
+		const userLoadorderFile = interaction.options.getAttachment('file');
+
+		if (userLoadorderFile.name !== 'loadorder.txt') {
+			await interaction.reply({ content: 'The file must be named loadorder.txt', ephemeral: true });
+			return;
+		}
+
+		console.log(userLoadorderFile.contentType);
+
+		const remoteManager = new RemoteManager(logger);
+		const userLoadorder = (await remoteManager.fetch(userLoadorderFile.url))
 			.toLowerCase()
 			.split(/\r?\n/);
 
@@ -66,28 +93,6 @@ module.exports = {
 		}
 	}
 };
-
-async function readRemoteLoadorder(url, logger) {
-	return new Promise((resolve, reject) => {
-		https.get(url, (response) => {
-			let content = '';
-			response.on('data', (chunk) => {
-				content += chunk;
-			});
-
-			response.on('end', () => {
-				resolve(content);
-			});
-
-			response.on('error', (error) => {
-				logger.logMessage(
-					`There was an error reading remote URL \`${url}\`\n\`\`\`\n${error}\n\`\`\``
-				);
-				reject(error);
-			});
-		});
-	});
-}
 
 function compare(master, user, reasons, skips) {
 	let response = '';
