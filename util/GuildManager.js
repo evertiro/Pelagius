@@ -68,6 +68,11 @@ class GuildManager {
 		return this._settings.guides[guide].enabled;
 	}
 
+	async setEnabled(guide, enabled) {
+		this._settings.guides[guide].enabled = enabled;
+		await this.persist();
+	}
+
 	async getLoadorder(guide) {
 		return this._fileManager.getLoadorderFile(this._guild.id, guide);
 	}
@@ -78,6 +83,10 @@ class GuildManager {
 
 	async getSkips(guide) {
 		return this._fileManager.getSkipsFile(this._guild.id, guide);
+	}
+
+	async setFile(guide, contents, fileName) {
+		this._fileManager.setFile(this._guild.id, guide, contents, fileName);
 	}
 }
 

@@ -88,9 +88,7 @@ class FileManager {
 		const loadorderFile = path.join(__dirname, '..', 'data', guildId, guide, 'loadorder.txt');
 
 		try {
-			return (await fsPromises.readFile(loadorderFile, { encoding: 'utf8' }))
-				.toLowerCase()
-				.split(/\r?\n/);
+			return await fsPromises.readFile(loadorderFile, { encoding: 'utf8' });
 		} catch {
 			return null;
 		}
@@ -100,11 +98,9 @@ class FileManager {
 		const reasonsFile = path.join(__dirname, '..', 'data', guildId, guide, 'reasons.json');
 
 		try {
-			return JSON.parse(
-				(await fsPromises.readFile(reasonsFile, { encoding: 'utf8' })).toLowerCase()
-			);
+			return await fsPromises.readFile(reasonsFile, { encoding: 'utf8' });
 		} catch {
-			return JSON.parse('{}');
+			return '{}';
 		}
 	}
 
@@ -112,12 +108,15 @@ class FileManager {
 		const skipsFile = path.join(__dirname, '..', 'data', guildId, guide, 'skips.txt');
 
 		try {
-			return (await fsPromises.readFile(skipsFile, { encoding: 'utf8' }))
-				.toLowerCase()
-				.split(/\r?\n/);
+			return await fsPromises.readFile(skipsFile, { encoding: 'utf8' });
 		} catch {
-			return [];
+			return '';
 		}
+	}
+
+	async setFile(guildId, guide, contents, fileName) {
+		const filePath = path.join(__dirname, '..', 'data', guildId, guide, fileName);
+		await fsPromises.writeFile(filePath, contents);
 	}
 }
 

@@ -40,7 +40,7 @@ module.exports = {
 			return;
 		}
 
-		const masterLoadorder = await guildManager.getLoadorder(guide);
+		const masterLoadorder = (await guildManager.getLoadorder(guide)).toLowerCase().split(/\r?\n/);
 		if (masterLoadorder === null) {
 			await interaction.reply({
 				content: `The loadorder file for \`${guide}\` has not been set`,
@@ -65,8 +65,8 @@ module.exports = {
 			return;
 		}
 
-		const reasons = await guildManager.getReasons(guide);
-		const skips = await guildManager.getSkips(guide);
+		const reasons = JSON.parse((await guildManager.getReasons(guide)).toLowerCase());
+		const skips = (await guildManager.getSkips(guide)).toLowerCase().split(/\r?\n/);
 
 		const userLoadorderFile = interaction.options.getAttachment('file');
 
@@ -75,7 +75,10 @@ module.exports = {
 			return;
 		}
 
-		console.log(userLoadorderFile.contentType);
+		if (userLoadorderFile.contentType !== 'text/plain; charset=utf-8') {
+			await interaction.reply({ content: 'The file must be the right filetype', ephemeral: true });
+			return;
+		}
 
 		const remoteManager = new RemoteManager(logger);
 		const userLoadorder = (await remoteManager.fetch(userLoadorderFile.url))

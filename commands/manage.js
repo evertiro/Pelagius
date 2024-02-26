@@ -1,5 +1,9 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { GuildManager } = require('../util/GuildManager.js');
+const { RemoteManager } = require('../util/RemoteManager.js');
+const { Logger } = require('../util/Logger.js');
+const { logChannelId } = require('../config.json');
+const { AttachmentBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -290,6 +294,75 @@ module.exports = {
 
 				await interaction.reply({
 					content: guideResponse,
+					ephemeral: true
+				});
+			}
+		} else if (subcommandGroup === 'file') {
+			const guides = guildManager.getGuides();
+			const defaultGuide = guildManager.getDefaultGuide();
+			const guide = interaction.options.getString('guide') ?? defaultGuide;
+			const enabled = guildManager.getEnabled(guide);
+			const type = interaction.options.getString('filetype');
+
+			if (!guides.includes(guide)) {
+				await interaction.reply({
+					content: `The guide \`${guide}\` does not exist in this server`,
+					ephemeral: true
+				});
+				return;
+			}
+
+			if (subcommand === 'upload') {
+				const uploadedFile = interaction.options.getAttachment('file');
+				const logChannel = await interaction.client.channels.fetch(logChannelId);
+				const logger = new Logger(logChannel);
+				const remoteManager = new RemoteManager(logger);
+				const fileContents = await remoteManager.fetch(uploadedFile.url);
+				const fileName =
+					type === 'reasons'
+						? 'reasons.json'
+						: type === 'loadorder'
+						? 'loadorder.txt'
+						: 'skips.txt';
+
+				if (type === 'reasons') {
+					try {
+						JSON.parse(fileContents);
+					} catch {
+						await interaction.reply({ content: 'Invalid JSON provided', ephemeral: true });
+						return;
+					}
+				}
+
+				await guildManager.setFile(guide, fileContents, fileName);
+				await interaction.reply({ content: `The ${type} file has been updated`, ephemeral: true });
+
+				if (type === 'loadorder' && !enabled) {
+					await guildManager.setEnabled(guide, true);
+					await interaction.followUp({
+						content: `Loadorder validation has been resumed for \`${guide}\``,
+						ephemeral: true
+					});
+				}
+			} else if (subcommand === 'retrieve') {
+				let attachment;
+				if (type === 'loadorder') {
+					const fileContents = await guildManager.getLoadorder(guide);
+					const buf = Buffer.from(fileContents, 'utf8');
+					attachment = new AttachmentBuilder(buf, { name: 'loadorder.txt' });
+				} else if (type === 'reasons') {
+					const fileContents = await guildManager.getReasons(guide);
+					const buf = Buffer.from(fileContents, 'utf8');
+					attachment = new AttachmentBuilder(buf, { name: 'reasons.json' });
+				} else if (type === 'skips') {
+					const fileContents = await guildManager.getSkips(guide);
+					const buf = Buffer.from(fileContents, 'utf8');
+					attachment = new AttachmentBuilder(buf, { name: 'skips.txt' });
+				}
+
+				await interaction.reply({
+					content: `Here is the current ${type} file for \`${guide}\``,
+					files: [attachment],
 					ephemeral: true
 				});
 			}
