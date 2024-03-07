@@ -40,7 +40,8 @@ module.exports = {
 		}
 
 		const masterLoadorder = (await guildManager.getLoadorder(guide)).toLowerCase().split(/\r?\n/);
-		if (masterLoadorder === null) {
+
+		if (masterLoadorder.length === 1 && masterLoadorder[0] === '') {
 			await interaction.editReply({
 				content: `The loadorder file for \`${guide}\` has not been set`
 			});
