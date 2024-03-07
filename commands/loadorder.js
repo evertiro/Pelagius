@@ -19,6 +19,7 @@ module.exports = {
 				.setDescription('Guide to validate loadorder against (use `/guides` to list guides)')
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		const logChannel = await interaction.client.channels.fetch(logChannelId);
 		const logger = new Logger(logChannel);
 		const guild = interaction.guild;
@@ -32,26 +33,23 @@ module.exports = {
 		const enabled = guildManager.getEnabled(guide);
 
 		if (!guides.includes(guide)) {
-			await interaction.reply({
-				content: `The guide \`${guide}\` does not exist in this server`,
-				ephemeral: true
+			await interaction.editReply({
+				content: `The guide \`${guide}\` does not exist in this server`
 			});
 			return;
 		}
 
 		const masterLoadorder = (await guildManager.getLoadorder(guide)).toLowerCase().split(/\r?\n/);
 		if (masterLoadorder === null) {
-			await interaction.reply({
-				content: `The loadorder file for \`${guide}\` has not been set`,
-				ephemeral: true
+			await interaction.editReply({
+				content: `The loadorder file for \`${guide}\` has not been set`
 			});
 			return;
 		}
 
 		if (!enabled) {
-			await interaction.reply({
-				content: `Loadorder validation is disabled for guide \`${guide}\``,
-				ephemeral: true
+			await interaction.editReply({
+				content: `Loadorder validation is disabled for guide \`${guide}\``
 			});
 			return;
 		}
@@ -59,15 +57,18 @@ module.exports = {
 		const userLoadorderFile = interaction.options.getAttachment('file');
 
 		if (userLoadorderFile.name !== 'loadorder.txt') {
-			await interaction.reply({ content: 'The file must be named loadorder.txt', ephemeral: true });
+			await interaction.editReply({
+				content: 'The file must be named loadorder.txt'
+			});
 			return;
 		}
 
 		if (userLoadorderFile.contentType !== 'text/plain; charset=utf-8') {
-			await interaction.reply({ content: 'The file must be the right filetype', ephemeral: true });
+			await interaction.editReply({
+				content: 'The file must be the right filetype'
+			});
 			return;
 		}
-		await interaction.deferReply();
 
 		const reasons = JSON.parse((await guildManager.getReasons(guide)).toLowerCase());
 		const skips = (await guildManager.getSkips(guide)).toLowerCase().split(/\r?\n/);
