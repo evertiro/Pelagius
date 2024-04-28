@@ -30,7 +30,6 @@ module.exports = {
 		const defaultGuide = guildManager.getDefaultGuide();
 
 		const guide = interaction.options.getString('guide') ?? defaultGuide;
-		const enabled = guildManager.getEnabled(guide);
 
 		if (!guides.includes(guide)) {
 			await interaction.editReply({
@@ -39,6 +38,7 @@ module.exports = {
 			return;
 		}
 
+		const enabled = guildManager.getEnabled(guide);
 		const masterLoadorder = (await guildManager.getLoadorder(guide)).toLowerCase().split(/\r?\n/);
 
 		if (masterLoadorder.length === 1 && masterLoadorder[0] === '') {
