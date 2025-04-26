@@ -53,6 +53,16 @@ one per line)
 - The [reasons file] will provide reasons to your users as to why they shouldn't
 have a certain file (it needs to be JSON)
 
+## Can I run Pelagius as a service?
+
+Yes! An [example service file] is included for your convenience. Copy it to your
+systemd/user directory, run `systemctl --user daemon-reload` followed by
+`systemctl --user start pelagius`.
+
+Be sure to update the WorkingDirectory and ExecStart lines with the appropriate
+paths! If you are using NVM, the ExecStart line should be run through `nvm-exec`
+like so: `ExecStart=/path/to/.nvm/nvm-exec pnpm start`
+
 ## Complete command list
 
 ### /loadorder
@@ -99,4 +109,5 @@ can be run in.
 [loadorder.txt]: example/loadorder.txt
 [skips file]: example/skips.txt
 [reasons file]: example/reasons.json
+[example service file]: example/pelagius.service
 [click here to add Pelagius]: https://discord.com/api/oauth2/authorize?client_id=714232981774139442&permissions=100352&scope=bot
