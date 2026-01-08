@@ -94,7 +94,7 @@ module.exports = {
 function compare(master, user, reasons, skips) {
 	let response = '';
 
-	let temp = 'Your loadorder is missing: \n';
+	let temp = 'Your loadorder is missing:\n--------------------------\n';
 	master.forEach((line) => {
 		if (line.trim() === '') {
 			return;
@@ -105,7 +105,15 @@ function compare(master, user, reasons, skips) {
 				temp += line;
 
 				if (Object.prototype.hasOwnProperty.call(reasons, line)) {
-					temp += reasons[line];
+					if (typeof reasons[line] === 'object') {
+						if (Object.prototype.hasOwnProperty.call(reasons[line], 'reason') && reasons[line]['reason'].length > 0) {
+							temp += `\n - From: ${reasons[line]['from']}\n - Reason: ${reasons[line]['reason']}`
+						} else {
+							temp += `\n - From: ${reasons[line]['from']}`;
+						}
+					} else {
+						temp += reasons[line]
+					}
 				}
 
 				temp += '\n';
@@ -113,11 +121,11 @@ function compare(master, user, reasons, skips) {
 		}
 	});
 
-	if (temp !== 'Your loadorder is missing: \n') {
+	if (temp !== 'Your loadorder is missing:\n--------------------------\n') {
 		response = temp;
 	}
 
-	temp = '\nYour loadorder should not have: \n';
+	temp = '\nYour loadorder should not have:\n-------------------------------\n';
 
 	user.forEach((line) => {
 		if (line.trim() === '') {
@@ -129,7 +137,15 @@ function compare(master, user, reasons, skips) {
 				temp += line;
 
 				if (Object.prototype.hasOwnProperty.call(reasons, line)) {
-					temp += reasons[line];
+					if (typeof reasons[line] === 'object') {
+						if (Object.prototype.hasOwnProperty.call(reasons[line], 'reason') && reasons[line]['reason'].length > 0) {
+							temp += `\n - From: ${reasons[line]['from']}\n - Reason: ${reasons[line]['reason']}`
+						} else {
+							temp += `\n - From: ${reasons[line]['from']}`;
+						}
+					} else {
+						temp += reasons[line]
+					}
 				}
 
 				temp += '\n';
