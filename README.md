@@ -55,8 +55,9 @@ If you want, you can also upload a "skips" and "reasons" file using the command
 - The [skips file] will ignore all listed filenames (files should be entered
 one per line)
 - The [reasons file] will provide reasons to your users as to why they should
-or shouldn't have a certain file (it needs to be JSON) - reasons can be
-formatted as simple or detailed, and formatting can be mixed:
+or shouldn't have a certain file (it needs to be JSON)
+  - Reasons can be formatted as simple or detailed, and formatting can be
+mixed:
 
 ### Simple reasons file
 
