@@ -81,7 +81,7 @@ formatted as simple or detailed, and formatting can be mixed:
 
 Yes! For the sake of stability, it is recommended that you run Pelagius
 through `pm2`. If you don't already have `pm2` installed, you can install it
-by running `npm install pm2@latest -g`. Once you have `pm2` installed, the
+by running `npm install pm2@latest -g`. Once you have `pm2` installed, run the
 following commands to launch the bot:
 
 ```
