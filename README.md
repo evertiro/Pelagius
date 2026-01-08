@@ -79,9 +79,39 @@ formatted as simple or detailed, and formatting can be mixed:
 
 ## Can I run Pelagius as a service?
 
-Yes! An [example service file] is included for your convenience. Copy it to your
-systemd/user directory, run `systemctl --user daemon-reload` followed by
-`systemctl --user start pelagius`.
+Yes! For the sake of stability, it is recommended that you run Pelagius
+through `pm2`. If you don't already have `pm2` installed, you can install it
+by running `npm install pm2@latest -g`. Once you have `pm2` installed, the
+following commands to launch the bot:
+
+```
+pm2 start yarn --name pelagius -- start
+pm2 save
+```
+
+Once the bot is running, we have to ensure it restarts if the server is
+rebooted. First, copy the current output of the **PATH** variable:
+
+```
+echo $PATH
+```
+
+Then edit the **crontab** for the user running the bot:
+
+```
+crontab -e
+```
+
+And add the following lines to it:
+
+```
+PATH=$PASTE_THE_OUTPUT_OF_$PATH
+@reboot pm2 resurrect &> /dev/null
+```
+
+If you'd prefer to run Pelagius as a systemd service, an [example service file]
+is included for your convenience. Copy it to your systemd/user directory, run
+`systemctl --user daemon-reload` followed by `systemctl --user start pelagius`.
 
 Be sure to update the WorkingDirectory and ExecStart lines with the appropriate
 paths! If you are using NVM, the ExecStart line should be run through `nvm-exec`
