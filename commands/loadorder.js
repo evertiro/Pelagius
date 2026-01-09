@@ -153,7 +153,7 @@ function compare(master, user, reasons, skips) {
 		}
 	});
 
-	if (temp !== '\nYour loadorder should not have: \n') {
+	if (temp !== '\nYour loadorder should not have:\n-------------------------------\n') {
 		response += temp;
 	}
 
